@@ -8,7 +8,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class CategoryViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=100)
+    name = serializers.CharField()
     class Meta:
         model = Category
         fields = ['id', 'name']
