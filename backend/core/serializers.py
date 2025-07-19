@@ -51,3 +51,8 @@ class TransactionUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['date', 'description', 'amount', 'category', 'is_recurring']
+    
+    def validate_amount(self, value):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero.")
+        return value

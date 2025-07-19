@@ -1,0 +1,96 @@
+/* Apply background gradient to body only once (best in index.css or globally if needed) */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #1a1444, #2a1b70);
+  color: white;
+}
+
+/* Remove background from .auth-page and just center content */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); /* adjust if you have navbar */
+  padding: 60px 20px;
+}
+
+/* Stylish card form */
+.auth-card {
+  background-color: #161d2f;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.auth-card h2 {
+  color: #ffffff;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.auth-card p {
+  color: #aab4cc;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.auth-card label {
+  display: block;
+  color: #ffffff;
+  text-align: left;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2c3554;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.auth-card input::placeholder {
+  color: #99aabb;
+}
+
+.auth-card button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #7f00ff, #9f00ff);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-card button:hover {
+  background: linear-gradient(to right, #6d00e6, #8700e6);
+}
+
+.auth-footer {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #aab4cc;
+}
+
+.auth-footer a {
+  color: #8e7dff;
+  text-decoration: none;
+  margin-left: 5px;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}

@@ -3,6 +3,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -36,8 +37,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return TransactionViewSerializer
         elif self.request.method == 'PATCH':
             return TransactionUpdateSerializer
-        else:
-            return TransactionSerializer
         
     def get_permissions(self):
         if self.request.method in ['GET','POST', 'PATCH','DELETE']:
@@ -45,7 +44,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        if user is IsAdminUser:
+        if user.is_staff:
             return Transaction.objects.all()
         elif user.is_authenticated:
             return Transaction.objects.filter(user=user)
