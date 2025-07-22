@@ -3,15 +3,16 @@ import { useAuth } from './AuthContext';
 import { transactionsAPI } from './api';
 import { useTransactions } from './hooks/useTransactions';
 import {
-  TransactionForm,
   SearchBar,
   FiltersSidebar,
   FilterSummary,
   PaginationInfo,
   TransactionTable,
-  PaginationControls
+  PaginationControls,
+  Button
 } from './components';
 import TransactionDetailModal from './components/TransactionDetailModal';
+import { navigateTo } from './utils/helpers';
 import './Transactions.css';
 
 const Transactions = () => {
@@ -48,37 +49,9 @@ const Transactions = () => {
     setAmountMax
   } = useTransactions(isAuthenticated);
 
-  const [formData, setFormData] = useState({
-    date: '',
-    category: '',
-    description: '',
-    amount: '',
-    is_recurring: false,
-  });
-
   // Modal state
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleAddTransaction = async (e) => {
-    e.preventDefault();
-    try {
-      await transactionsAPI.createTransaction(formData);
-      setCurrentPage(1);
-      setFormData({ date: '', category: '', description: '', amount: '', is_recurring: false });
-      fetchTransactions();
-    } catch (error) {
-      setError('Failed to add transaction');
-    }
-  };
 
   const handleTransactionClick = (transaction) => {
     setSelectedTransaction(transaction);
@@ -101,14 +74,17 @@ const Transactions = () => {
   return (
     <section className="transactions-wrapper" id="transactions">
       <div className="transactions-card">
-        <h2>Transactions</h2>
-
-        <TransactionForm 
-          formData={formData}
-          handleChange={handleChange}
-          handleAddTransaction={handleAddTransaction}
-          error={error}
-        />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h2>Transactions</h2>
+          <Button onClick={() => navigateTo('#add-transactions')}>
+            + Add Transactions
+          </Button>
+        </div>
 
         <SearchBar 
           searchInput={searchInput}

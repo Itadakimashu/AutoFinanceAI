@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import TransactionsPage from './pages/TransactionsPage';
+import AddTransactionsPage from './pages/AddTransactionsPage';
 import { useRouter } from './hooks/useRouter';
 import { ROUTES } from './utils/constants';
 import './App.css';
@@ -20,6 +21,8 @@ function AppContent() {
         return <SignupPage />;
       case ROUTES.TRANSACTIONS:
         return <TransactionsPage />;
+      case ROUTES.ADD_TRANSACTIONS:
+        return <AddTransactionsPage />;
       case ROUTES.HOME:
       default:
         return <HomePage />;

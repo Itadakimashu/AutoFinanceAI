@@ -4,7 +4,8 @@ export const ROUTES = {
   HOME: '#home',
   LOGIN: '#login',
   SIGNUP: '#signup',
-  TRANSACTIONS: '#transactions'
+  TRANSACTIONS: '#transactions',
+  ADD_TRANSACTIONS: '#add-transactions'
 };
 
 export const CATEGORIES = [

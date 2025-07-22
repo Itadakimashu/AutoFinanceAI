@@ -24,3 +24,4 @@ export { default as PaginationInfo } from './PaginationInfo';
 export { default as TransactionTable } from './TransactionTable';
 export { default as PaginationControls } from './PaginationControls';
 export { default as TransactionDetailModal } from './TransactionDetailModal';
+export { default as MultiTransactionForm } from './MultiTransactionForm';
