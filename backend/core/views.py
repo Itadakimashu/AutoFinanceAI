@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from django.db.models import Sum, Count, Q
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -48,5 +50,33 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return Transaction.objects.all()
         elif user.is_authenticated:
             return Transaction.objects.filter(user=user)
+    
+    def list(self, request, *args, **kwargs):
+        # Get the filtered queryset (before pagination)
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Calculate totals for the filtered data
+        totals = queryset.aggregate(
+            total_income=Sum('amount', filter=Q(category='income')),
+            total_expenses=Sum('amount', filter=~Q(category='income')),
+            total_amount=Sum('amount'),
+        )
+        
+        # Apply pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+            
+            # Add totals to the response
+            response.data['totals'] = {
+                'total_income': float(totals['total_income'] or 0),
+                'total_expenses': float(totals['total_expenses'] or 0),
+                'net_amount': float((totals['total_income'] or 0) - (totals['total_expenses'] or 0)),
+            }
+            return response
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     

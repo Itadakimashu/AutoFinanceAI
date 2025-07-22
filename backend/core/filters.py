@@ -9,6 +9,6 @@ class TransactionFilters(FilterSet):
         model = Transaction
         fields = {
             'category': ['exact'],
-            'amount': ['gt', 'lt'],
+            'amount': ['gte', 'lte'],
         }
 

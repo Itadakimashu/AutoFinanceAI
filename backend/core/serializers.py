@@ -28,6 +28,7 @@ class TransactionViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'user', 'date', 'description', 'amount', 'category', 'is_recurring']
+    
 
 class TransactionCreateSerializer(serializers.ModelSerializer):
     date = serializers.DateField()
