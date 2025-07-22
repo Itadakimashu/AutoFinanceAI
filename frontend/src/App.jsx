@@ -1,42 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AuthProvider } from './AuthContext';
-import Navbar from './Navbar';
-import Login from './Login';
-import Signup from './Signup';
-import Transactions from './Transactions';
-import Home from './Home';
+import Navigation from './components/layout/Navigation';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import TransactionsPage from './pages/TransactionsPage';
+import { useRouter } from './hooks/useRouter';
+import { ROUTES } from './utils/constants';
 import './App.css';
 
-function App() {
-  const [view, setView] = useState(window.location.hash || '#home');
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setView(window.location.hash || '#home');
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+function AppContent() {
+  const { currentView } = useRouter();
 
   const renderPage = () => {
-    switch (view) {
-      case '#login':
-        return <Login switchToSignup={() => (window.location.hash = '#signup')} />;
-      case '#signup':
-        return <Signup switchToLogin={() => (window.location.hash = '#login')} />;
-      case '#transactions':
-        return <Transactions />;
-      case '#home':
+    switch (currentView) {
+      case ROUTES.LOGIN:
+        return <LoginPage />;
+      case ROUTES.SIGNUP:
+        return <SignupPage />;
+      case ROUTES.TRANSACTIONS:
+        return <TransactionsPage />;
+      case ROUTES.HOME:
       default:
-        return <Home />; // ✅ Use the new Home component
+        return <HomePage />;
     }
   };
 
   return (
-    <AuthProvider>
-      <Navbar />
+    <>
+      <Navigation />
       {renderPage()}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }
