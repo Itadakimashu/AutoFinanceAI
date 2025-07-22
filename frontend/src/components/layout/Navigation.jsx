@@ -58,9 +58,6 @@ const Navigation = () => {
             <NavButton onClick={() => navigateTo('#transactions')}>
               Transactions
             </NavButton>
-            <NavButton onClick={() => navigateTo('#add-transactions')}>
-              Add Transactions
-            </NavButton>
             <UserWelcome user={user} />
             <NavButton onClick={handleLogout} variant="logout">
               Logout

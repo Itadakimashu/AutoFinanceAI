@@ -9,6 +9,11 @@ export const useTransactions = (isAuthenticated) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pageSize] = useState(10);
+  const [totals, setTotals] = useState({
+    total_income: 0,
+    total_expenses: 0,
+    net_amount: 0
+  });
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +52,10 @@ export const useTransactions = (isAuthenticated) => {
         setTransactions(data.results);
         setTotalCount(data.count || 0);
         setTotalPages(Math.ceil((data.count || 0) / pageSize));
+        // Set totals if available in the response
+        if (data.totals) {
+          setTotals(data.totals);
+        }
       } else if (Array.isArray(data)) {
         setTransactions(data);
         setTotalCount(data.length);
@@ -139,6 +148,7 @@ export const useTransactions = (isAuthenticated) => {
     dateTo,
     amountMin,
     amountMax,
+    totals,
     
     // Actions
     fetchTransactions,

@@ -9,28 +9,26 @@ const TransactionTable = ({
   onTransactionClick 
 }) => {
   return (
-    <table style={{ tableLayout: 'fixed', width: '100%' }}>
+    <table>
       <thead>
         <tr>
           <th 
             onClick={() => handleSortChange('date')}
             style={{ 
               cursor: 'pointer', 
-              userSelect: 'none',
-              width: '15%'
+              userSelect: 'none'
             }}
             title="Click to sort by date"
           >
             Date {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
           </th>
-          <th style={{ width: '18%' }}>Category</th>
-          <th style={{ width: '47%' }}>Description</th>
+          <th>Category</th>
+          <th>Description</th>
           <th 
             onClick={() => handleSortChange('amount')}
             style={{ 
               cursor: 'pointer', 
-              userSelect: 'none',
-              width: '20%'
+              userSelect: 'none'
             }}
             title="Click to sort by amount"
           >
@@ -70,16 +68,18 @@ const TransactionTable = ({
               <td>{tx.date}</td>
               <td style={{ textTransform: 'capitalize' }}>{tx.category}</td>
               <td>
-                <span 
+                <div 
                   style={{ 
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%',
+                    display: 'block'
                   }}
                   title={tx.description}
                 >
                   {tx.description}
-                </span>
+                </div>
               </td>
               <td style={{ fontWeight: '600' }}>{tx.amount}</td>
             </tr>

@@ -9,7 +9,8 @@ import {
   PaginationInfo,
   TransactionTable,
   PaginationControls,
-  Button
+  Button,
+  TotalsSummary
 } from './components';
 import TransactionDetailModal from './components/TransactionDetailModal';
 import { navigateTo } from './utils/helpers';
@@ -35,6 +36,7 @@ const Transactions = () => {
     dateTo,
     amountMin,
     amountMax,
+    totals,
     fetchTransactions,
     handleSearchChange,
     handleSearchSubmit,
@@ -91,6 +93,8 @@ const Transactions = () => {
           handleSearchChange={handleSearchChange}
           handleSearchSubmit={handleSearchSubmit}
         />
+
+        <TotalsSummary totals={totals} loading={loading} />
 
         <div style={{
           display: 'flex',
