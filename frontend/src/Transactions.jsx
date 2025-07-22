@@ -11,6 +11,7 @@ import {
   TransactionTable,
   PaginationControls
 } from './components';
+import TransactionDetailModal from './components/TransactionDetailModal';
 import './Transactions.css';
 
 const Transactions = () => {
@@ -55,6 +56,10 @@ const Transactions = () => {
     is_recurring: false,
   });
 
+  // Modal state
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -73,6 +78,24 @@ const Transactions = () => {
     } catch (error) {
       setError('Failed to add transaction');
     }
+  };
+
+  const handleTransactionClick = (transaction) => {
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleTransactionUpdate = () => {
+    fetchTransactions(); // Refresh the transactions list
+  };
+
+  const handleTransactionDelete = () => {
+    fetchTransactions(); // Refresh the transactions list
   };
 
   return (
@@ -141,6 +164,7 @@ const Transactions = () => {
               sortBy={sortBy}
               sortOrder={sortOrder}
               handleSortChange={handleSortChange}
+              onTransactionClick={handleTransactionClick}
             />
 
             <PaginationControls 
@@ -151,6 +175,14 @@ const Transactions = () => {
           </div>
         </div>
       </div>
+
+      <TransactionDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        transaction={selectedTransaction}
+        onUpdate={handleTransactionUpdate}
+        onDelete={handleTransactionDelete}
+      />
     </section>
   );
 };

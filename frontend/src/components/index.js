@@ -4,6 +4,7 @@ export { default as Input } from './common/Input';
 export { default as ErrorMessage } from './common/ErrorMessage';
 export { default as SuccessMessage } from './common/SuccessMessage';
 export { default as LoadingSpinner } from './common/LoadingSpinner';
+export { default as Modal } from './common/Modal';
 
 // Auth components
 export { default as AuthCard } from './auth/AuthCard';
@@ -22,3 +23,4 @@ export { default as FilterSummary } from './FilterSummary';
 export { default as PaginationInfo } from './PaginationInfo';
 export { default as TransactionTable } from './TransactionTable';
 export { default as PaginationControls } from './PaginationControls';
+export { default as TransactionDetailModal } from './TransactionDetailModal';
