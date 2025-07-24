@@ -60,6 +60,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             total_income=Sum('amount', filter=Q(category='income')),
             total_expenses=Sum('amount', filter=~Q(category='income')),
             total_amount=Sum('amount'),
+            transaction_count=Count('id')
         )
         
         # Apply pagination
@@ -73,6 +74,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 'total_income': float(totals['total_income'] or 0),
                 'total_expenses': float(totals['total_expenses'] or 0),
                 'net_amount': float((totals['total_income'] or 0) - (totals['total_expenses'] or 0)),
+                'total_transactions': totals['transaction_count']
             }
             return response
         
