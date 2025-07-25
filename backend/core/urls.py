@@ -5,7 +5,7 @@ from .views import TransactionViewSet, ImageToTransactionViewSet
 
 router = DefaultRouter()
 router.register(r'transactions', TransactionViewSet, basename='transaction')
-router.register(r'image-to-text', ImageToTransactionViewSet, basename='image-to-text')
+router.register(r'image-to-trasaction', ImageToTransactionViewSet, basename='image-to-text')
 
 urlpatterns = [
     path('', include(router.urls)),
