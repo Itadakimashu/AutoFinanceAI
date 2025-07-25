@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Button from './common/Button';
 import ErrorMessage from './common/ErrorMessage';
 import SuccessMessage from './common/SuccessMessage';
+import ReceiptUploader from './ReceiptUploader';
 import { CATEGORIES } from '../utils/constants';
 
 const TransactionRow = ({ 
@@ -10,7 +11,8 @@ const TransactionRow = ({
   onChange, 
   onRemove, 
   showRemove = true,
-  error 
+  error,
+  disabled = false
 }) => {
   return (
     <div style={{
@@ -30,13 +32,15 @@ const TransactionRow = ({
         value={transaction.date}
         onChange={(e) => onChange(index, e)}
         required
+        disabled={disabled}
         style={{
           padding: '8px 12px',
           border: `1px solid ${error?.date ? '#e74c3c' : '#475569'}`,
           borderRadius: '4px',
-          backgroundColor: '#334155',
-          color: 'white',
-          fontSize: '14px'
+          backgroundColor: disabled ? '#1e293b' : '#334155',
+          color: disabled ? '#64748b' : 'white',
+          fontSize: '14px',
+          cursor: disabled ? 'not-allowed' : 'text'
         }}
       />
 
@@ -45,13 +49,15 @@ const TransactionRow = ({
         value={transaction.category}
         onChange={(e) => onChange(index, e)}
         required
+        disabled={disabled}
         style={{
           padding: '8px 12px',
           border: `1px solid ${error?.category ? '#e74c3c' : '#475569'}`,
           borderRadius: '4px',
-          backgroundColor: '#334155',
-          color: 'white',
-          fontSize: '14px'
+          backgroundColor: disabled ? '#1e293b' : '#334155',
+          color: disabled ? '#64748b' : 'white',
+          fontSize: '14px',
+          cursor: disabled ? 'not-allowed' : 'pointer'
         }}
       >
         <option value="">Select Category</option>
@@ -69,13 +75,15 @@ const TransactionRow = ({
         value={transaction.description}
         onChange={(e) => onChange(index, e)}
         required
+        disabled={disabled}
         style={{
           padding: '8px 12px',
           border: `1px solid ${error?.description ? '#e74c3c' : '#475569'}`,
           borderRadius: '4px',
-          backgroundColor: '#334155',
-          color: 'white',
-          fontSize: '14px'
+          backgroundColor: disabled ? '#1e293b' : '#334155',
+          color: disabled ? '#64748b' : 'white',
+          fontSize: '14px',
+          cursor: disabled ? 'not-allowed' : 'text'
         }}
       />
 
@@ -86,13 +94,15 @@ const TransactionRow = ({
         value={transaction.amount}
         onChange={(e) => onChange(index, e)}
         required
+        disabled={disabled}
         style={{
           padding: '8px 12px',
           border: `1px solid ${error?.amount ? '#e74c3c' : '#475569'}`,
           borderRadius: '4px',
-          backgroundColor: '#334155',
-          color: 'white',
-          fontSize: '14px'
+          backgroundColor: disabled ? '#1e293b' : '#334155',
+          color: disabled ? '#64748b' : 'white',
+          fontSize: '14px',
+          cursor: disabled ? 'not-allowed' : 'text'
         }}
       />
 
@@ -109,7 +119,11 @@ const TransactionRow = ({
           name="is_recurring"
           checked={transaction.is_recurring}
           onChange={(e) => onChange(index, e)}
-          style={{ marginRight: '4px' }}
+          disabled={disabled}
+          style={{ 
+            marginRight: '4px',
+            cursor: disabled ? 'not-allowed' : 'pointer'
+          }}
         />
         Recurring
       </label>
@@ -118,25 +132,30 @@ const TransactionRow = ({
         <button
           type="button"
           onClick={() => onRemove(index)}
+          disabled={disabled}
           style={{
             padding: '6px',
-            border: '1px solid #e74c3c',
+            border: `1px solid ${disabled ? '#64748b' : '#e74c3c'}`,
             borderRadius: '4px',
             backgroundColor: 'transparent',
-            color: '#e74c3c',
-            cursor: 'pointer',
+            color: disabled ? '#64748b' : '#e74c3c',
+            cursor: disabled ? 'not-allowed' : 'pointer',
             fontSize: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
           onMouseOver={(e) => {
-            e.target.style.backgroundColor = '#e74c3c';
-            e.target.style.color = 'white';
+            if (!disabled) {
+              e.target.style.backgroundColor = '#e74c3c';
+              e.target.style.color = 'white';
+            }
           }}
           onMouseOut={(e) => {
-            e.target.style.backgroundColor = 'transparent';
-            e.target.style.color = '#e74c3c';
+            if (!disabled) {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = '#e74c3c';
+            }
           }}
         >
           ×
@@ -158,9 +177,29 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
   ]);
   
   const [loading, setLoading] = useState(false);
+  const [receiptLoading, setReceiptLoading] = useState(false);
   const [errors, setErrors] = useState([]);
   const [generalError, setGeneralError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const handleTransactionsParsed = (parsedTransactions) => {
+    // Convert parsed transactions to form format
+    const formattedTransactions = parsedTransactions.map(transaction => ({
+      date: transaction.date || '',
+      category: transaction.category || '',
+      description: transaction.description || '',
+      amount: transaction.amount || '',
+      is_recurring: transaction.is_recurring || false
+    }));
+
+    // Replace current transactions with parsed ones
+    setTransactions(formattedTransactions);
+    setErrors([]);
+    setSuccess(`Successfully parsed ${formattedTransactions.length} transaction(s) from receipt!`);
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => setSuccess(''), 3000);
+  };
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;
@@ -294,6 +333,13 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
         <ErrorMessage message={generalError} />
         <SuccessMessage message={success} />
 
+        {/* Receipt Uploader */}
+        <ReceiptUploader
+          onTransactionsParsed={handleTransactionsParsed}
+          loading={receiptLoading}
+          setLoading={setReceiptLoading}
+        />
+
         {/* Header Row */}
         <div style={{
           display: 'grid',
@@ -323,6 +369,7 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
             onRemove={removeTransaction}
             showRemove={transactions.length > 1}
             error={errors[index]}
+            disabled={receiptLoading}
           />
         ))}
 
@@ -337,7 +384,7 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
           <Button
             onClick={addTransaction}
             variant="secondary"
-            disabled={loading}
+            disabled={loading || receiptLoading}
           >
             + Add Another Transaction
           </Button>
@@ -346,14 +393,14 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
             <Button
               onClick={onCancel}
               variant="secondary"
-              disabled={loading}
+              disabled={loading || receiptLoading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               loading={loading}
-              disabled={loading}
+              disabled={loading || receiptLoading}
             >
               Save All Transactions ({transactions.length})
             </Button>

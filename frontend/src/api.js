@@ -112,6 +112,19 @@ export const transactionsAPI = {
     const response = await api.delete(`/api/transactions/${id}/`);
     return response.data;
   },
+
+  // Parse transactions from image
+  parseTransactionsFromImage: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    const response = await api.post('/api/image-to-trasaction/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 export default api;
