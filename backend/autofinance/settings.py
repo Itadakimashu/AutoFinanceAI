@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+import environ 
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +31,8 @@ SECRET_KEY = 'django-insecure-p_2f%+czc&%litdp6f5yy27v&)ie!0)%vfu$*!ap1^hsvd0^#2
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+API_NINJAS_API_KEY = env('API_NINJAS_API_KEY')
 
 
 # Application definition

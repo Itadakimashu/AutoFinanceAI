@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
+from django.conf import settings
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -86,11 +87,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
-
-class TransactionImageViewSet(viewsets.ModelViewSet):
-    queryset = TransactionImage.objects.all()
-    serializer_class = TransactionImageSerializer
-    
 class ImageToTransactionViewSet(viewsets.ModelViewSet):
     queryset = TransactionImage.objects.all()
     serializer_class = TransactionImageSerializer
@@ -104,7 +100,7 @@ class ImageToTransactionViewSet(viewsets.ModelViewSet):
         # Check file size limit (5MB)
         if image_file.size > 5 * 1024 * 1024:
             return Response({"error": "Image file size exceeds 5MB limit."}, status=status.HTTP_400_BAD_REQUEST)
-        api_key = 'EqfrzG67AM+JNkZaZUL1Yg==UyZkDq1Z9QVueOAW'
+        api_key = settings.API_NINJAS_API_KEY
         result = extract_text_from_image(image_file, api_key)
         if not result.get("success"):
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
