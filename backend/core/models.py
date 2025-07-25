@@ -29,3 +29,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.description} - {self.amount} BDT"
+    
+
+class TransactionImage(models.Model):
+    image = models.ImageField(upload_to='transaction_images/')

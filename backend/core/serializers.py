@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction
+from .models import Transaction, TransactionImage
 
 from djoser.serializers import UserCreateSerializer
 
@@ -57,3 +57,9 @@ class TransactionUpdateSerializer(serializers.ModelSerializer):
         if value is not None and value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
         return value
+    
+
+class TransactionImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionImage
+        fields = ['id', 'image']
