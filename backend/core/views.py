@@ -25,6 +25,7 @@ from .filters import TransactionFilters
 from .pagination import DefaultPagination
 from .Image_to_text import extract_text_from_image
 from .transaction_parser import parse_transaction_from_text
+from .category_predictor import predict_category
 
 # Create your views here.
 
@@ -123,6 +124,11 @@ class ImageToTransactionViewSet(viewsets.ModelViewSet):
         if not transactions_data:
             return Response({"error": "Failed to parse transaction data."}, status=status.HTTP_400_BAD_REQUEST)
         
+        #predict the category of each transaction
+        api_key = settings.GEMINI_API_KEY
+        transactions_data = predict_category(transactions_data, api_key)
+
+
         transactions = []
         for transaction_data in transactions_data:
             try:

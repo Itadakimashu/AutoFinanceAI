@@ -25,7 +25,7 @@ def parse_transaction_from_text(extracted_text_list):
     # Create transaction for each line item
     for item in line_items:
         transaction_data = {
-            'category': 'food',  # Since these are food receipts
+            'category': 'miscellaneous',  # Default category, can be updated later
             'date': receipt_date,
             'description': f"{merchant_name} - {item['description']}",
             'amount': item['amount']

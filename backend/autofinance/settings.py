@@ -33,6 +33,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 API_NINJAS_API_KEY = env('API_NINJAS_API_KEY')
+GEMINI_API_KEY = env('GEMINI_API_KEY')
 
 
 # Application definition
@@ -150,7 +151,7 @@ REST_FRAMEWORK = {
 #djoser authentication settings
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=365)
 }
 
 DJOSER = {
