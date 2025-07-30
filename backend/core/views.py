@@ -1,3 +1,5 @@
+from datetime import date as dt
+
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
 from django.conf import settings
@@ -23,9 +25,7 @@ from .serializers import (
 )
 from .filters import TransactionFilters
 from .pagination import DefaultPagination
-from .Image_to_text import extract_text_from_image
-from .transaction_parser import parse_transaction_from_text
-from .category_predictor import predict_category
+from . image_to_transaction import image_to_transaction
 
 # Create your views here.
 
@@ -101,33 +101,15 @@ class ImageToTransactionViewSet(viewsets.ModelViewSet):
         # Check file size limit (5MB)
         if image_file.size > 5 * 1024 * 1024:
             return Response({"error": "Image file size exceeds 5MB limit."}, status=status.HTTP_400_BAD_REQUEST)
-        api_key = settings.API_NINJAS_API_KEY
-        result = extract_text_from_image(image_file, api_key)
-        if not result.get("success"):
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Extract text from the API response
-        extracted_data = result.get("extracted_text", [])
-        if isinstance(extracted_data, list):
-            # Convert list of dicts to list of strings
-            text_list = []
-            for item in extracted_data:
-                if isinstance(item, dict):
-                    text_list.append(item.get('text', ''))
-                else:
-                    text_list.append(str(item))
-        else:
-            text_list = [str(extracted_data)]
-        
-        # Parse the extracted text into a transaction
-        transactions_data = parse_transaction_from_text(text_list)
-        if not transactions_data:
-            return Response({"error": "Failed to parse transaction data."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        #predict the category of each transaction
         api_key = settings.GEMINI_API_KEY
-        transactions_data = predict_category(transactions_data, api_key)
-
+        try:
+            image_bytes = image_file.read()
+            transactions_data = image_to_transaction(image_bytes, api_key)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not transactions_data:
+            return Response({"error": "Failed to extract transactions from image."}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         transactions = []
         for transaction_data in transactions_data:
@@ -135,13 +117,9 @@ class ImageToTransactionViewSet(viewsets.ModelViewSet):
                 # Ensure required fields have values
                 description = transaction_data.get('description', 'Unknown transaction')
                 amount = transaction_data.get('amount', 0)
-                date = transaction_data.get('date')
+                date = transaction_data.get('date', dt.today())
                 category = transaction_data.get('category', 'miscellaneous')
                 
-                # If no date is parsed, use today's date
-                if not date:
-                    from datetime import date as dt_date
-                    date = dt_date.today()
                 
                 # Create Transaction instance without saving to database
                 transaction = Transaction(
