@@ -1,6 +1,8 @@
 from google import genai
 import json
 
+from .constants import catagory_choices
+
 def image_to_transaction(image_bytes, api_key):
     client = genai.Client(api_key=api_key)
 
@@ -16,7 +18,10 @@ def image_to_transaction(image_bytes, api_key):
             {"date": "YYYY-MM-DD", "description": "Burger King - Burger", "amount": 32, "category": "Food"},
             {"date": "YYYY-MM-DD", "description": "Burger King - Frenchfries", "amount": 13, "category": "Food"},
             ...]
-        '''
+        ''',
+        'Categories: ['
+        + ', '.join([f'"{category}"' for category in catagory_choices])
+        + ']'
         ]
     )
 
