@@ -183,14 +183,56 @@ const MultiTransactionForm = ({ onSave, onCancel }) => {
   const [success, setSuccess] = useState('');
 
   const handleTransactionsParsed = (parsedTransactions) => {
-    // Convert parsed transactions to form format
-    const formattedTransactions = parsedTransactions.map(transaction => ({
-      date: transaction.date || '',
-      category: transaction.category || '',
-      description: transaction.description || '',
-      amount: transaction.amount || '',
-      is_recurring: transaction.is_recurring || false
-    }));
+    // Convert parsed transactions to form format with category mapping
+    const formattedTransactions = parsedTransactions.map(transaction => {
+      // Map backend categories to frontend category values
+      let mappedCategory = '';
+      if (transaction.category) {
+        const backendCategory = transaction.category.toLowerCase();
+        // Map common category variations
+        const categoryMapping = {
+          'food': 'food',
+          'dining': 'food', 
+          'restaurant': 'food',
+          'groceries': 'food',
+          'grocery': 'food',
+          'transportation': 'transport',
+          'transport': 'transport',
+          'gas': 'transport',
+          'fuel': 'transport',
+          'utilities': 'utilities',
+          'utility': 'utilities',
+          'electric': 'utilities',
+          'water': 'utilities',
+          'internet': 'utilities',
+          'entertainment': 'entertainment',
+          'streaming': 'entertainment',
+          'movies': 'entertainment',
+          'healthcare': 'health',
+          'health': 'health',
+          'medical': 'health',
+          'pharmacy': 'health',
+          'income': 'income',
+          'salary': 'income',
+          'wage': 'income',
+          'clothing': 'clothing',
+          'clothes': 'clothing',
+          'shopping': 'miscellaneous',
+          'cash': 'miscellaneous',
+          'atm': 'miscellaneous'
+        };
+        
+        mappedCategory = categoryMapping[backendCategory] || 'miscellaneous';
+      }
+      
+      return {
+        date: transaction.date || '',
+        category: mappedCategory,
+        description: transaction.description || '',
+        amount: transaction.amount || '',
+        is_recurring: transaction.is_recurring || false
+      };
+    });
 
     // Replace current transactions with parsed ones
     setTransactions(formattedTransactions);

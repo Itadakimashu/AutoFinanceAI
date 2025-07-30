@@ -71,16 +71,16 @@ td:nth-child(3) div {
 }
 
 th {
-  background-color: #2a254a;
+  background-color: #2a254a !important;
   color: #d8b4fe;
 }
 
 tr:nth-child(even) {
-  background-color: #25203f;
+  background-color: #25203f !important;
 }
 
 tr:hover {
-  background-color: #322e50;
+  background-color: #322e50 !important;
 }
 .add-transaction-form {
   display: grid;
