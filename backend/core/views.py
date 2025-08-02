@@ -1,4 +1,5 @@
-from datetime import date as dt
+from datetime import date as dt, datetime
+from django.utils import timezone
 
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
@@ -26,6 +27,7 @@ from .serializers import (
 from .filters import TransactionFilters
 from .pagination import DefaultPagination
 from . image_to_transaction import image_to_transaction
+from .analysis import transaction_analysis
 
 # Create your views here.
 
@@ -142,5 +144,42 @@ class ImageToTransactionViewSet(viewsets.ModelViewSet):
             "message": f"Extracted {len(transactions)} transactions from image",
             "transactions": serializer.data
         }, status=status.HTTP_200_OK)
+    
+
+class AnalysisView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        month = dt.today().month
+        year = dt.today().year
+
+        current_month_transactions_qs = request.user.transactions.filter(
+            date__year=year,
+            date__month=month
+        )
+
+        previous_month_transactions_qs = request.user.transactions.filter(
+            date__year=year if month > 1 else year - 1,
+            date__month=month - 1 if month > 1 else 12,
+        )
+
+        
+        
+        # Convert to list of dictionaries for the analysis
+        current_transactions = list(current_month_transactions_qs.values(
+            'date', 'description', 'amount', 'category', 'is_recurring'
+        ))
+        previous_transactions = list(previous_month_transactions_qs.values(
+            'date', 'description', 'amount', 'category', 'is_recurring'
+        ))  
+        
+        api_key = settings.GEMINI_API_KEY
+        
+        try:
+            analysis_result = transaction_analysis(api_key, current_transactions, previous_transactions)
+            # Add metadata to the response
+            return Response(analysis_result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
   

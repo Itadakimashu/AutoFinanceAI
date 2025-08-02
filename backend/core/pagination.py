@@ -4,7 +4,7 @@ from collections import OrderedDict
 import math
 
 class DefaultPagination(PageNumberPagination):
-    page_size = 10
+    page_size = 20
     
     def get_paginated_response(self, data):
         total_pages = math.ceil(self.page.paginator.count / self.page_size) if self.page_size else 1
