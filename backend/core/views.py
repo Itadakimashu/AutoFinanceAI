@@ -150,8 +150,9 @@ class AnalysisView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        month = dt.today().month
-        year = dt.today().year
+        # Get month and year from query parameters, default to current month/year if not provided
+        month = int(request.GET.get('month', dt.today().month))
+        year = int(request.GET.get('year', dt.today().year))
 
         current_month_transactions_qs = request.user.transactions.filter(
             date__year=year,
