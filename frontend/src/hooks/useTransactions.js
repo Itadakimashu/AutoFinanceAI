@@ -8,7 +8,7 @@ export const useTransactions = (isAuthenticated) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20); // Will be updated from backend response
   const [totals, setTotals] = useState({
     total_income: 0,
     total_expenses: 0,
@@ -51,7 +51,9 @@ export const useTransactions = (isAuthenticated) => {
       if (data && data.results && Array.isArray(data.results)) {
         setTransactions(data.results);
         setTotalCount(data.count || 0);
-        setTotalPages(Math.ceil((data.count || 0) / pageSize));
+        // Use backend's pagination data
+        setTotalPages(data.total_pages || 1);
+        setPageSize(data.page_size || 20);
         // Set totals if available in the response
         if (data.totals) {
           setTotals(data.totals);
@@ -60,16 +62,19 @@ export const useTransactions = (isAuthenticated) => {
         setTransactions(data);
         setTotalCount(data.length);
         setTotalPages(1);
+        setPageSize(20);
       } else {
         setTransactions([]);
         setTotalCount(0);
         setTotalPages(1);
+        setPageSize(20);
       }
     } catch (error) {
       setError(`Failed to load transactions: ${error.response?.data?.detail || error.message}`);
       setTransactions([]);
       setTotalCount(0);
       setTotalPages(1);
+      setPageSize(20);
     } finally {
       setLoading(false);
     }

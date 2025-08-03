@@ -5,7 +5,8 @@ export const ROUTES = {
   LOGIN: '#login',
   SIGNUP: '#signup',
   TRANSACTIONS: '#transactions',
-  ADD_TRANSACTIONS: '#add-transactions'
+  ADD_TRANSACTIONS: '#add-transactions',
+  ANALYSIS: '#analysis'
 };
 
 export const CATEGORIES = [
@@ -36,7 +37,8 @@ export const API_ENDPOINTS = {
   LOGIN: '/api/auth/login/',
   REGISTER: '/api/auth/register/',
   REFRESH: '/api/auth/refresh/',
-  TRANSACTIONS: '/api/transactions/'
+  TRANSACTIONS: '/api/transactions/',
+  ANALYSIS: '/api/analysis/'
 };
 
 export const MESSAGES = {
