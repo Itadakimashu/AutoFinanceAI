@@ -173,6 +173,10 @@ class AnalysisView(APIView):
         previous_transactions = list(previous_month_transactions_qs.values(
             'date', 'description', 'amount', 'category', 'is_recurring'
         ))  
+
+        # Parse Date into string format
+        for transaction in current_transactions + previous_transactions:
+            transaction['date'] = transaction['date'].strftime('%Y-%m-%d')
         
         api_key = settings.GEMINI_API_KEY
         

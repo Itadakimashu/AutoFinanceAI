@@ -195,10 +195,14 @@ const AnalysisPage = () => {
                 <div className="score-circle">
                   <div className="score-display">
                     <span className="score-number">
-                      {typeof analysis.financial_health_score.score === 'string' 
-                        ? analysis.financial_health_score.score.replace(/\/100.*$/, '')
-                        : analysis.financial_health_score.score
-                      }
+                      {(() => {
+                        if (typeof analysis.financial_health_score.score === 'string') {
+                          // Handle formats like "20 out of 100", "20/100", or "20"
+                          const match = analysis.financial_health_score.score.match(/(\d+)/);
+                          return match ? match[1] : analysis.financial_health_score.score;
+                        }
+                        return analysis.financial_health_score.score;
+                      })()}
                     </span>
                     <span className="score-total">/100</span>
                   </div>
@@ -206,9 +210,14 @@ const AnalysisPage = () => {
                 </div>
                 <div className="score-description">
                   {(() => {
-                    const score = typeof analysis.financial_health_score.score === 'string' 
-                      ? parseInt(analysis.financial_health_score.score.replace(/\/100.*$/, ''))
-                      : analysis.financial_health_score.score;
+                    let score;
+                    if (typeof analysis.financial_health_score.score === 'string') {
+                      // Handle formats like "20 out of 100", "20/100", or "20"
+                      const match = analysis.financial_health_score.score.match(/(\d+)/);
+                      score = match ? parseInt(match[1]) : parseInt(analysis.financial_health_score.score);
+                    } else {
+                      score = analysis.financial_health_score.score;
+                    }
                     
                     if (score >= 80) return "Excellent financial health! 🎉";
                     if (score >= 60) return "Good financial management 👍";
