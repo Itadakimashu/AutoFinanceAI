@@ -90,6 +90,24 @@ class TransactionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
+    # Create a new transaction or multiple transactions
+    # If a list of transactions is provided, it will create all of them
+    def create(self, request, *args, **kwargs):
+        is_many = isinstance(request.data, list)
+
+        serializer = self.get_serializer(
+            data=request.data,
+            many=is_many,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    # perform_create method is used to save the transaction with the user
+    def perform_create(self, serializer):
+        serializer.save()
+    
 class ImageToTransactionViewSet(viewsets.ModelViewSet):
     queryset = TransactionImage.objects.all()
     serializer_class = TransactionImageSerializer

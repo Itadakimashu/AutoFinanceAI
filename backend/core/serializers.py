@@ -42,9 +42,15 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        
         user = self.context['request'].user
-        validated_data['user'] = user
-        return super().create(validated_data)
+        if isinstance(validated_data, list):
+            for item in validated_data:
+                item['user'] = user
+            return Transaction.objects.bulk_create([Transaction(**item) for item in validated_data])
+        else:
+            validated_data['user'] = user
+            return super().create(validated_data)
 
 class TransactionUpdateSerializer(serializers.ModelSerializer):
     date = serializers.DateField(required=False)
