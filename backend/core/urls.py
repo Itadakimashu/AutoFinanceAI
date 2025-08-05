@@ -5,7 +5,10 @@ from .views import (
     TransactionViewSet, 
     ImageToTransactionViewSet,
     AnalysisView,
-    user_update
+    TransactionPDFView,
+
+    #function based views
+    user_update,
 )
 
 router = DefaultRouter()
@@ -16,5 +19,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('analysis/', AnalysisView.as_view(), name='analysis'),
     path('user/update/', user_update, name='user-update'),
-
+    path('transactions/pdf/download/', TransactionPDFView.as_view(), name='transaction-pdf'),
 ] 

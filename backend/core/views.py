@@ -1,10 +1,12 @@
 from datetime import date as dt, datetime
 from django.utils import timezone
+from django.http import HttpResponse
 
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import FileResponse
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -32,6 +34,7 @@ from .filters import TransactionFilters
 from .pagination import DefaultPagination
 from . image_to_transaction import image_to_transaction
 from .analysis import transaction_analysis
+from .transaction_to_pdf import create_transaction_pdf
 
 # Create your views here.
 
@@ -209,6 +212,8 @@ class AnalysisView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def user_update(request):
@@ -218,3 +223,61 @@ def user_update(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class TransactionPDFView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Get month and year from query parameters, default to current month/year if not provided
+            month = int(request.GET.get('month', dt.today().month))
+            year = int(request.GET.get('year', dt.today().year))
+
+            transactions_qs = request.user.transactions.filter(
+                date__year=year,
+                date__month=month
+            )
+
+            transactions = list(transactions_qs.values(
+                'date', 'description', 'amount', 'category'
+            ))
+
+            # Check if transactions exist
+            if not transactions:
+                return Response(
+                    {"error": f"No transactions found for {year}-{month:02d}"}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Parse Date into string format
+            for transaction in transactions:
+                transaction['date'] = transaction['date'].strftime('%Y-%m-%d')
+
+            # Create PDF
+            pdf_data = create_transaction_pdf(transactions)
+
+            # Verify PDF data
+            if not pdf_data or not isinstance(pdf_data, bytes):
+                return Response(
+                    {"error": "Failed to generate PDF data"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # Return PDF as response
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="transactions_{year}_{month:02d}.pdf"'
+            response['Content-Length'] = len(pdf_data)
+            return response
+            
+        except ValueError as e:
+            return Response(
+                {"error": "Invalid month or year parameter"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to generate PDF: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
