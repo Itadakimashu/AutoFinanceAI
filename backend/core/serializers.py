@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Transaction, TransactionImage
 
-from djoser.serializers import UserCreateSerializer
+from djoser.serializers import UserCreateSerializer,PasswordSerializer
 
 from django.contrib.auth.models import User
 
@@ -9,14 +9,42 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     model = User
     class Meta(UserCreateSerializer.Meta):
         fields = ['id', 'username', 'email', 'password','first_name', 'last_name']
+
+class CustomUserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
     
+    def validate_email(self, value):
+        """Ensure email is unique across users (excluding current user)"""
+        user = self.instance
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+    def validate_first_name(self, value):
+        """Ensure first name is not empty if provided"""
+        if value is not None and value.strip() == '':
+            raise serializers.ValidationError("First name cannot be empty.")
+        return value
+    
+    def validate_last_name(self, value):
+        """Ensure last name is not empty if provided"""
+        if value is not None and value.strip() == '':
+            raise serializers.ValidationError("Last name cannot be empty.")
+        return value
+
+
 class UserViewSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(max_length=150, read_only=True)
     email = serializers.EmailField(read_only=True)
+    first_name = serializers.CharField(max_length=30, read_only=True)
+    last_name = serializers.CharField(max_length=30, read_only=True)
 
     class Meta:
-        fields = ['id', 'username', 'email']
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:

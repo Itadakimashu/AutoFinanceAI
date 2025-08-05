@@ -156,7 +156,9 @@ SIMPLE_JWT = {
 DJOSER = {
     'SERIALIZERS': {
         'user_create': 'core.serializers.CustomUserCreateSerializer',
-    }
+        'current_user': 'core.serializers.UserViewSerializer',
+    },
+    'SET_PASSWORD_RETYPE': True,
 }
 
 # CORS settings

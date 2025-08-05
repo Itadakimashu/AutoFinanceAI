@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -11,9 +12,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view, permission_classes
+
 
 from django_filters.rest_framework import DjangoFilterBackend
+
 
 
 from .models import Transaction, TransactionImage
@@ -22,7 +25,8 @@ from .serializers import (
     TransactionViewSerializer, 
     TransactionCreateSerializer,
     TransactionUpdateSerializer,
-    TransactionImageSerializer
+    TransactionImageSerializer,
+    CustomUserUpdateSerializer
 )
 from .filters import TransactionFilters
 from .pagination import DefaultPagination
@@ -205,4 +209,12 @@ class AnalysisView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def user_update(request):
+    user = request.user
+    serializer = CustomUserUpdateSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
