@@ -159,117 +159,107 @@ const AnalysisPage = () => {
 
       {analysis && !loading && (
         <div className="analysis-results">
-          {analysis.metadata && (
-            <div className="analysis-metadata">
-              <div className="metadata-content">
-                <div className="metadata-header">
-                  <h3>📊 Analysis Summary</h3>
-                </div>
-                <div className="metadata-stats">
-                  <div className="stat-card">
-                    <div className="stat-value">{analysis.metadata.current_transactions_count}</div>
-                    <div className="stat-label">Transactions in {analysis.metadata.current_month}</div>
+          {/* Financial Score - First and Prominent */}
+          {analysis.financial_score && (
+            <div className="score-hero-section">
+              <div className="score-hero-container">
+                <div className="score-circle-large">
+                  <div className="score-display-large">
+                    <span className="score-number-large">{analysis.financial_score.score}</span>
+                    <span className="score-total-large">/100</span>
                   </div>
-                  {analysis.metadata.previous_transactions_count > 0 && (
+                  <div className="score-status-large">{analysis.financial_score.status}</div>
+                </div>
+                <div className="score-info">
+                  <h2>💚 Your Financial Health</h2>
+                  <p className="score-description-large">
+                    {(() => {
+                      const score = analysis.financial_score.score;
+                      if (score >= 80) return "Excellent! Keep it up! 🎉";
+                      if (score >= 60) return "Good job! 👍";
+                      if (score >= 40) return "Getting better 📈";
+                      return "Time to improve 💪";
+                    })()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Overview Section */}
+          {analysis.overview && (
+            <div className="overview-hero">
+              <h3>📊 Quick Summary</h3>
+              <p className="overview-text">{analysis.overview}</p>
+            </div>
+          )}
+
+          {/* Main Grid Layout */}
+          <div className="analysis-grid">
+            {analysis.metadata && (
+              <div className="analysis-metadata grid-item">
+                <div className="metadata-content">
+                  <div className="metadata-header">
+                    <h3>📊 Analysis Summary</h3>
+                  </div>
+                  <div className="metadata-stats">
                     <div className="stat-card">
-                      <div className="stat-value">{analysis.metadata.previous_transactions_count}</div>
-                      <div className="stat-label">Transactions in {analysis.metadata.previous_month}</div>
+                      <div className="stat-value">{analysis.metadata.current_transactions_count}</div>
+                      <div className="stat-label">Transactions in {analysis.metadata.current_month}</div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {analysis.Overview && (
-            <div className="analysis-section overview-section">
-              <h3>📊 Overview</h3>
-              <p>{analysis.Overview}</p>
-            </div>
-          )}
-
-          {analysis.financial_health_score && (
-            <div className="analysis-section health-score">
-              <h3>💚 Financial Health Score</h3>
-              <div className="score-container">
-                <div className="score-circle">
-                  <div className="score-display">
-                    <span className="score-number">
-                      {(() => {
-                        if (typeof analysis.financial_health_score.score === 'string') {
-                          // Handle formats like "20 out of 100", "20/100", or "20"
-                          const match = analysis.financial_health_score.score.match(/(\d+)/);
-                          return match ? match[1] : analysis.financial_health_score.score;
-                        }
-                        return analysis.financial_health_score.score;
-                      })()}
-                    </span>
-                    <span className="score-total">/100</span>
+                    {analysis.metadata.previous_transactions_count > 0 && (
+                      <div className="stat-card">
+                        <div className="stat-value">{analysis.metadata.previous_transactions_count}</div>
+                        <div className="stat-label">Transactions in {analysis.metadata.previous_month}</div>
+                      </div>
+                    )}
                   </div>
-                  <div className="score-label">Health Score</div>
-                </div>
-                <div className="score-description">
-                  {(() => {
-                    let score;
-                    if (typeof analysis.financial_health_score.score === 'string') {
-                      // Handle formats like "20 out of 100", "20/100", or "20"
-                      const match = analysis.financial_health_score.score.match(/(\d+)/);
-                      score = match ? parseInt(match[1]) : parseInt(analysis.financial_health_score.score);
-                    } else {
-                      score = analysis.financial_health_score.score;
-                    }
-                    
-                    if (score >= 80) return "Excellent financial health! 🎉";
-                    if (score >= 60) return "Good financial management 👍";
-                    if (score >= 40) return "Room for improvement 📈";
-                    return "Focus needed on financial habits 💪";
-                  })()}
                 </div>
               </div>
-              {analysis.financial_health_score.factors && (
-                <div className="score-details">
-                  <h4>Contributing Factors:</h4>
-                  <ul>
-                    {analysis.financial_health_score.factors.map((factor, index) => (
-                      <li key={index}>{factor}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {analysis.financial_health_score.improvement_areas && (
-                <div className="score-details">
-                  <h4>Areas for Improvement:</h4>
-                  <ul>
-                    {analysis.financial_health_score.improvement_areas.map((area, index) => (
-                      <li key={index}>{area}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+            )}
 
-          {analysis.alerts_and_warnings && (
-            <div className="analysis-section alerts">
-              <h3>⚠️ Alerts & Warnings</h3>
-              <ul>
-                {analysis.alerts_and_warnings.map((alert, index) => (
-                  <li key={index}>{alert}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {analysis.quick_tips && analysis.quick_tips.length > 0 && (
+              <div className="tips-section grid-item">
+                <h3>💡 Quick Tips</h3>
+                <div className="tips-grid">
+                  {analysis.quick_tips.map((tip, index) => (
+                    <div key={index} className="tip-card">
+                      <span className="tip-icon">💰</span>
+                      <span className="tip-text">{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {analysis.positive_trends && (
-            <div className="analysis-section positive">
-              <h3>✅ Positive Trends</h3>
-              <ul>
-                {analysis.positive_trends.map((trend, index) => (
-                  <li key={index}>{trend}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {analysis.warnings && analysis.warnings.length > 0 && (
+              <div className="warnings-section grid-item">
+                <h3>⚠️ Watch Out</h3>
+                <div className="warning-list">
+                  {analysis.warnings.map((warning, index) => (
+                    <div key={index} className="warning-item">
+                      <span className="warning-icon">⚠️</span>
+                      <span className="warning-text">{warning}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {analysis.good_habits && analysis.good_habits.length > 0 && (
+              <div className="positive-section grid-item">
+                <h3>✅ Good Job!</h3>
+                <div className="positive-list">
+                  {analysis.good_habits.map((habit, index) => (
+                    <div key={index} className="positive-item">
+                      <span className="positive-icon">✅</span>
+                      <span className="positive-text">{habit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
