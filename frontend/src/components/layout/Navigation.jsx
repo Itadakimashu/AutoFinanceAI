@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../AuthContext';
+import ProfileDropdown from '../ProfileDropdown';
 import '../../Navbar.css';
 
 const Logo = ({ onClick }) => {
@@ -32,14 +33,10 @@ const UserWelcome = ({ user }) => {
 };
 
 const Navigation = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const navigateTo = (hash) => {
     window.location.hash = hash;
-  };
-
-  const handleLogout = () => {
-    logout();
   };
 
   return (
@@ -61,10 +58,7 @@ const Navigation = () => {
             <NavButton onClick={() => navigateTo('#analysis')}>
               Analysis
             </NavButton>
-            <UserWelcome user={user} />
-            <NavButton onClick={handleLogout} variant="logout">
-              Logout
-            </NavButton>
+            <ProfileDropdown />
           </>
         ) : (
           <>

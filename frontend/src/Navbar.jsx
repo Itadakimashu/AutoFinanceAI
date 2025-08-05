@@ -1,16 +1,13 @@
 import React from 'react';
 import { useAuth } from './AuthContext';
+import ProfileDropdown from './components/ProfileDropdown';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const navigateTo = (hash) => {
     window.location.hash = hash;
-  };
-
-  const handleLogout = () => {
-    logout();
   };
 
   return (
@@ -27,8 +24,7 @@ const Navbar = () => {
         {isAuthenticated ? (
           <>
             <button onClick={() => navigateTo('#transactions')} className="nav-btn">Transactions</button>
-            <span className="user-welcome">Welcome, {user?.first_name || user?.email}</span>
-            <button onClick={handleLogout} className="nav-btn logout-btn">Logout</button>
+            <ProfileDropdown />
           </>
         ) : (
           <>

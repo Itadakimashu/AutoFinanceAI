@@ -87,14 +87,6 @@ body {
   color: #fef2f2;
 }
 
-.user-welcome {
-  color: #93c5fd;
-  font-weight: 500;
-  padding: 0.4rem 0.8rem;
-  background-color: rgba(147, 197, 253, 0.1);
-  border-radius: 6px;
-  border: 1px solid rgba(147, 197, 253, 0.3);
-}
 .nav-links button {
   background: linear-gradient(90deg, #7f3eff, #a75fff);
   border: none;
