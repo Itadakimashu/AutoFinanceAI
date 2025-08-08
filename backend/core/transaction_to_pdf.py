@@ -10,7 +10,7 @@ class TransactionPDF(FPDF):
     def header(self):
         """Add header to each page"""
         self.set_font('Helvetica', 'B', 16)
-        self.cell(0, 10, 'Auto Finance AI Transaction Report', border=0, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+        self.cell(0, 10, 'Auto Finance AI Monthly Transcript', border=0, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
         
         # Add motto
         self.set_font('Helvetica', 'I', 10)
