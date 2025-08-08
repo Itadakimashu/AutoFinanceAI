@@ -21,7 +21,8 @@ export const CATEGORIES = [
   { value: 'housing', label: 'Housing' },
   { value: 'savings', label: 'Savings' },
   { value: 'investment', label: 'Investment' },
-  { value: 'miscellaneous', label: 'Miscellaneous' }
+  { value: 'miscellaneous', label: 'Miscellaneous' },
+  { value: 'tax', label: 'Tax' }
 ];
 
 export const SORT_OPTIONS = [

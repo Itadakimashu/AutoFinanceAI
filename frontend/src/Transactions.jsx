@@ -10,7 +10,8 @@ import {
   TransactionTable,
   PaginationControls,
   Button,
-  TotalsSummary
+  TotalsSummary,
+  DownloadModal
 } from './components';
 import TransactionDetailModal from './components/TransactionDetailModal';
 import { navigateTo } from './utils/helpers';
@@ -54,6 +55,8 @@ const Transactions = () => {
   // Modal state
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const handleTransactionClick = (transaction) => {
     setSelectedTransaction(transaction);
@@ -73,6 +76,58 @@ const Transactions = () => {
     fetchTransactions(); // Refresh the transactions list
   };
 
+  const handleDownloadClick = () => {
+    setIsDownloadModalOpen(true);
+  };
+
+  const handleDownloadModalClose = () => {
+    setIsDownloadModalOpen(false);
+  };
+
+  const handleDownload = async (formData) => {
+    try {
+      setDownloading(true);
+      
+      const response = await transactionsAPI.downloadTransactionsPDF(
+        formData.year, 
+        formData.month
+      );
+      
+      // Create blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Use custom filename with year and month
+      const filename = `${formData.filename}_${formData.year}_${formData.month.toString().padStart(2, '0')}.pdf`;
+      link.setAttribute('download', filename);
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setIsDownloadModalOpen(false);
+    } catch (error) {
+      console.error('Download failed:', error);
+      
+      // Show error message to user
+      if (error.response?.status === 404) {
+        setError(`No transactions found for ${formData.year}-${formData.month.toString().padStart(2, '0')}`);
+      } else {
+        setError('Failed to download PDF. Please try again.');
+      }
+      
+      // Clear error after a few seconds
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <section className="transactions-wrapper" id="transactions">
       <div className="transactions-card">
@@ -83,9 +138,21 @@ const Transactions = () => {
           marginBottom: '20px'
         }}>
           <h2>Transactions</h2>
-          <Button onClick={() => navigateTo('#add-transactions')}>
-            + Add Transactions
-          </Button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button 
+              onClick={handleDownloadClick}
+              disabled={downloading}
+              style={{
+                background: downloading ? '#94a3b8' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white'
+              }}
+            >
+              {downloading ? 'Downloading...' : '📄 Download PDF'}
+            </Button>
+            <Button onClick={() => navigateTo('#add-transactions')}>
+              + Add Transactions
+            </Button>
+          </div>
         </div>
 
         <SearchBar 
@@ -93,6 +160,39 @@ const Transactions = () => {
           handleSearchChange={handleSearchChange}
           handleSearchSubmit={handleSearchSubmit}
         />
+
+        {error && (
+          <div style={{
+            background: '#fee2e2',
+            border: '1px solid #fecaca',
+            color: '#dc2626',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <span>⚠️</span>
+            <span>{error}</span>
+            <button 
+              onClick={() => setError(null)}
+              style={{
+                marginLeft: 'auto',
+                background: 'none',
+                border: 'none',
+                color: '#dc2626',
+                cursor: 'pointer',
+                fontSize: '18px',
+                padding: '0',
+                width: '20px',
+                height: '20px'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         <TotalsSummary totals={totals} loading={loading} />
 
@@ -162,6 +262,12 @@ const Transactions = () => {
         transaction={selectedTransaction}
         onUpdate={handleTransactionUpdate}
         onDelete={handleTransactionDelete}
+      />
+
+      <DownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={handleDownloadModalClose}
+        onDownload={handleDownload}
       />
     </section>
   );

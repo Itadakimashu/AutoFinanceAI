@@ -125,6 +125,15 @@ export const transactionsAPI = {
     });
     return response.data;
   },
+
+  // Download transactions PDF
+  downloadTransactionsPDF: async (year, month) => {
+    const response = await api.get('/api/transactions/pdf/download/', {
+      params: { year, month },
+      responseType: 'blob', // Important for file downloads
+    });
+    return response;
+  },
 };
 
 export default api;

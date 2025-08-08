@@ -238,7 +238,7 @@ class TransactionPDFView(APIView):
             transactions_qs = request.user.transactions.filter(
                 date__year=year,
                 date__month=month
-            )
+            ).order_by('date')
 
             transactions = list(transactions_qs.values(
                 'date', 'description', 'amount', 'category'

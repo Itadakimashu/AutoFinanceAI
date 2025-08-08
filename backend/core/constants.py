@@ -11,4 +11,5 @@ catagory_choices = [
         ('savings', 'Savings'),
         ('investment', 'Investment'),
         ('miscellaneous', 'Miscellaneous'),
+        ('tax','Tax'),
     ]

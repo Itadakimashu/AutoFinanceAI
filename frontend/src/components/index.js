@@ -26,3 +26,4 @@ export { default as PaginationControls } from './PaginationControls';
 export { default as TransactionDetailModal } from './TransactionDetailModal';
 export { default as MultiTransactionForm } from './MultiTransactionForm';
 export { default as TotalsSummary } from './TotalsSummary';
+export { default as DownloadModal } from './DownloadModal';
