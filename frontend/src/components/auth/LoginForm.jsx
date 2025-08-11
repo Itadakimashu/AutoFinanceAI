@@ -32,7 +32,7 @@ const LoginForm = ({ onSwitchToSignup }) => {
       const result = await login(formData.username, formData.password);
       
       if (result.success) {
-        window.location.hash = '#transactions';
+        window.location.hash = '#home';
       } else {
         setError(result.error);
       }

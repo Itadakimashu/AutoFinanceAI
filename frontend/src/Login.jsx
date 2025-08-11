@@ -19,8 +19,8 @@ function Login({ switchToSignup }) {
       const result = await login(username, password);
       
       if (result.success) {
-        // Redirect to transactions page after successful login
-        window.location.hash = '#transactions';
+        // Redirect to homepage after successful login
+        window.location.hash = '#home';
       } else {
         setError(result.error);
       }
