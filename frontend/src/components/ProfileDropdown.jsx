@@ -180,7 +180,7 @@ const ProfileEditModal = ({ user, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/user/update/', {
+      const response = await fetch('https://autofinanceai.onrender.com/api/user/update/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ const ChangePasswordModal = ({ onClose }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/auth/users/set_password/', {
+      const response = await fetch('https://autofinanceai.onrender.com/auth/users/set_password/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

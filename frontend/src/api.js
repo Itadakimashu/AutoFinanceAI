@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'http://localhost:8000', // Django backend URL
+  baseURL: 'https://autofinanceai.onrender.com/', // Django backend URL
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,7 +34,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post('http://localhost:8000/auth/jwt/refresh/', {
+          const response = await axios.post('https://autofinanceai.onrender.com/auth/jwt/refresh/', {
             refresh: refreshToken,
           });
           
