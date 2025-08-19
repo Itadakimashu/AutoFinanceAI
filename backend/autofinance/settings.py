@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import environ 
+import dj_database_url
 
 env = environ.Env()
 environ.Env.read_env()
@@ -95,6 +96,7 @@ DATABASES = {
     }
 }
 
+DATABASES['default'] = dj_database_url.config(default=env('DATABASE_URL'))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
