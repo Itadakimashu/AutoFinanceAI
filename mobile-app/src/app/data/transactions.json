@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "category": "Food",
+    "date": "2026-07-11",
+    "description": "Lunch at NSU Cafeteria",
+    "amount": 180,
+    "is_recurring": false
+  },
+  {
+    "id": 2,
+    "category": "Transport",
+    "date": "2026-07-10",
+    "description": "Uber Ride",
+    "amount": 350,
+    "is_recurring": false
+  },
+  {
+    "id": 3,
+    "category": "Shopping",
+    "date": "2026-07-09",
+    "description": "Keyboard Purchase",
+    "amount": 4200,
+    "is_recurring": false
+  },
+  {
+    "id": 4,
+    "category": "Bills",
+    "date": "2026-07-08",
+    "description": "Internet Bill",
+    "amount": 1200,
+    "is_recurring": true
+  },
+  {
+    "id": 5,
+    "category": "Entertainment",
+    "date": "2026-07-07",
+    "description": "Netflix Subscription",
+    "amount": 550,
+    "is_recurring": true
+  }
+]
