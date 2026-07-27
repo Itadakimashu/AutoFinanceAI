@@ -15,6 +15,7 @@ import * as Sharing from "expo-sharing";
 
 import "../../../global.css";
 
+import { useAuth } from "../context/AuthContext";
 import {
   createTransaction,
   deleteTransaction,
@@ -92,6 +93,7 @@ function arrayBufferToFile(buffer: ArrayBuffer, filename: string) {
 
 export default function TransactionsScreen() {
   const router = useRouter();
+  const { onLogout } = useAuth();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totals, setTotals] = useState<TransactionTotals | null>(null);
@@ -160,7 +162,7 @@ export default function TransactionsScreen() {
     setIsComposerOpen(true);
   };
 
-  const openEditComposer = (transaction: Transaction) => {
+  const openTransactionDetails = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsComposerOpen(true);
   };
@@ -290,8 +292,13 @@ export default function TransactionsScreen() {
     setPage(1);
   };
 
+  const handleLogout = async () => {
+    await onLogout();
+    router.replace("/login" as any);
+  };
+
   return (
-    <View className="flex-1 bg-slate-950">
+    <View className="flex-1 bg-slate-950" style={{ flex: 1 }}>
       <TransactionsFilterDrawer
         isOpen={isFilterDrawerOpen}
         value={filters}
@@ -304,7 +311,7 @@ export default function TransactionsScreen() {
 
       <TransactionComposerModal
         visible={isComposerOpen}
-        mode={selectedTransaction ? "edit" : "create"}
+        mode={selectedTransaction ? "detail" : "create"}
         initialValues={
           selectedTransaction
             ? mapTransactionToForm(selectedTransaction)
@@ -322,7 +329,7 @@ export default function TransactionsScreen() {
       <FlatList
         data={transactions}
         renderItem={({ item }) => (
-          <TransactionRow item={item} onPress={() => openEditComposer(item)} />
+          <TransactionRow item={item} onPress={() => openTransactionDetails(item)} />
         )}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
@@ -335,7 +342,7 @@ export default function TransactionsScreen() {
             colors={["#22d3ee"]}
           />
         }
-        contentContainerClassName="px-4 pb-10 pt-14"
+        contentContainerClassName="px-4 pt-14 pb-28"
         ListHeaderComponent={
           <View className="mb-5 gap-4">
             <TransactionsHeader
@@ -348,6 +355,7 @@ export default function TransactionsScreen() {
               onOpenComposer={openCreateComposer}
               onOpenAnalysis={() => router.push("/analysis" as any)}
               onExportPdf={exportMonthlyPdf}
+              onLogout={handleLogout}
               isExportingPdf={isExportingPdf}
             />
 

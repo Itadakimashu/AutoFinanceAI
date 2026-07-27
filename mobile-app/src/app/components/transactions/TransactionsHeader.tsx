@@ -12,6 +12,7 @@ type TransactionsHeaderProps = {
   onOpenComposer: () => void;
   onOpenAnalysis: () => void;
   onExportPdf: () => void;
+  onLogout: () => void;
   isExportingPdf?: boolean;
 };
 
@@ -51,6 +52,7 @@ export function TransactionsHeader({
   onOpenComposer,
   onOpenAnalysis,
   onExportPdf,
+  onLogout,
   isExportingPdf,
 }: TransactionsHeaderProps) {
   const income = totals?.total_income ?? 0;
@@ -128,7 +130,7 @@ export function TransactionsHeader({
         />
       </View>
 
-      <View className="flex-row items-center gap-3">
+      <View className="flex-row flex-wrap items-center gap-3">
         <Pressable
           className="flex-1 rounded-2xl bg-white/5 px-4 py-3"
           onPress={onOpenAnalysis}
@@ -145,6 +147,15 @@ export function TransactionsHeader({
         >
           <Text className="text-center text-sm font-semibold text-fuchsia-200">
             {isExportingPdf ? "Exporting..." : `PDF • ${count} entries`}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          className="w-full rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3"
+          onPress={onLogout}
+        >
+          <Text className="text-center text-sm font-semibold text-rose-200">
+            Log out
           </Text>
         </Pressable>
       </View>

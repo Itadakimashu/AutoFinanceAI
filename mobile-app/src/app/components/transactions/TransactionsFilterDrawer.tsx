@@ -49,6 +49,7 @@ export function TransactionsFilterDrawer({
       ) : null}
 
       <View
+        pointerEvents={isOpen ? "auto" : "none"}
         className={`absolute left-0 top-0 bottom-0 z-40 w-[86%] max-w-sm border-r border-white/10 bg-slate-950 px-4 pb-8 pt-14 shadow-2xl shadow-slate-950/60 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <View className="mb-5 flex-row items-start justify-between">
