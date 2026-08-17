@@ -13,7 +13,6 @@ type TransactionsHeaderProps = {
   onOpenComposer: () => void;
   onOpenAnalysis: () => void;
   onExportPdf: () => void;
-  onLogout: () => void;
 };
 
 function StatTile({
@@ -57,7 +56,6 @@ export function TransactionsHeader({
   onOpenComposer,
   onOpenAnalysis,
   onExportPdf,
-  onLogout,
 }: TransactionsHeaderProps) {
   const income = totals?.total_income ?? 0;
   const expenses = totals?.total_expenses ?? 0;
@@ -69,9 +67,9 @@ export function TransactionsHeader({
       <View className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-cyan-400/10" />
       <View className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-fuchsia-400/10" />
 
-      <View className="mb-5 flex-row items-start gap-4">
+      <View className="mb-5 flex-row items-center gap-3">
         <Pressable
-          className="mt-1 h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5"
+          className="h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5"
           onPress={onOpenFilters}
         >
           <View className="gap-1.5">
@@ -93,24 +91,12 @@ export function TransactionsHeader({
           </Text>
         </View>
 
-        <View className="items-end gap-2">
-          <Pressable
-            className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5"
-            onPress={onLogout}
-            hitSlop={8}
-          >
-            <Text className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-300">
-              Log out
-            </Text>
-          </Pressable>
-
-          <Pressable
-            className="h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10"
-            onPress={onOpenComposer}
-          >
-            <Text className="text-2xl font-light text-cyan-200">＋</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          className="h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10"
+          onPress={onOpenComposer}
+        >
+          <Text className="text-2xl font-light text-cyan-200">＋</Text>
+        </Pressable>
       </View>
 
       <View className="mb-4 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3">

@@ -34,21 +34,12 @@ export function TransactionRow({ item, onPress }: TransactionRowProps) {
         </View>
 
         <View className="flex-1">
-          <View className="mb-1 flex-row items-center gap-2">
-            <Text
-              className="text-base font-semibold text-white"
-              numberOfLines={1}
-            >
-              {item.description}
-            </Text>
-            {item.is_recurring ? (
-              <View className="rounded-full bg-emerald-400/15 px-2 py-0.5">
-                <Text className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                  Recurring
-                </Text>
-              </View>
-            ) : null}
-          </View>
+          <Text
+            className="mb-1 text-base font-semibold text-white"
+            numberOfLines={1}
+          >
+            {item.description}
+          </Text>
 
           <View className="flex-row flex-wrap items-center gap-2">
             <View className="rounded-full bg-white/5 px-2.5 py-1">

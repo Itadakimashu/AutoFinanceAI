@@ -16,6 +16,7 @@ type TransactionsFilterDrawerProps = {
   onApply: () => void;
   onReset: () => void;
   onClose: () => void;
+  onLogout: () => void;
 };
 
 const CATEGORY_OPTIONS = [
@@ -125,6 +126,7 @@ export function TransactionsFilterDrawer({
   onApply,
   onReset,
   onClose,
+  onLogout,
 }: TransactionsFilterDrawerProps) {
   const [activeDateField, setActiveDateField] = useState<DateField | null>(
     null,
@@ -266,6 +268,15 @@ export function TransactionsFilterDrawer({
               label="Apply filters"
               onPress={onApply}
               className="flex-1"
+            />
+          </View>
+
+          <View className="mt-6 border-t border-white/5 pt-6">
+            <Button
+              label="Log out"
+              variant="danger"
+              icon="log-out-outline"
+              onPress={onLogout}
             />
           </View>
         </ScrollView>

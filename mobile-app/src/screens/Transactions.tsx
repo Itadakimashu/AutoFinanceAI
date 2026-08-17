@@ -258,6 +258,7 @@ export default function TransactionsScreen() {
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
         onClose={() => setIsFilterDrawerOpen(false)}
+        onLogout={handleLogout}
       />
 
       <TransactionComposerModal
@@ -322,7 +323,6 @@ export default function TransactionsScreen() {
               onOpenComposer={openCreateComposer}
               onOpenAnalysis={() => router.push("/analysis")}
               onExportPdf={() => setIsPdfExportModalOpen(true)}
-              onLogout={handleLogout}
             />
 
             <ErrorBanner message={errorMessage} className="rounded-[1.5rem]" />
