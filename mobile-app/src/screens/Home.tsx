@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+
+import { Button } from "../components/ui";
 
 export default function Home() {
   const router = useRouter();
@@ -51,23 +53,18 @@ export default function Home() {
           </Text>
 
           <View className="mt-6 flex-row gap-3">
-            <Pressable
-              className="flex-1 items-center rounded-2xl bg-cyan-400 px-4 py-4"
-              onPress={() => router.push("/login" as any)}
-            >
-              <Text className="text-base font-semibold text-slate-950">
-                Login
-              </Text>
-            </Pressable>
+            <Button
+              label="Login"
+              className="flex-1"
+              onPress={() => router.push("/login")}
+            />
 
-            <Pressable
-              className="flex-1 items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-4"
-              onPress={() => router.push("/signup" as any)}
-            >
-              <Text className="text-base font-semibold text-white">
-                Create account
-              </Text>
-            </Pressable>
+            <Button
+              label="Create account"
+              variant="secondary"
+              className="flex-1"
+              onPress={() => router.push("/signup")}
+            />
           </View>
         </View>
 

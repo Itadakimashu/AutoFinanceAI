@@ -1,6 +1,8 @@
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
-import { TRANSACTION_CATEGORY_CHOICES } from "./constants";
+import { Ionicons } from "@expo/vector-icons";
+
+import { TRANSACTION_CATEGORY_CHOICES, getTransactionCategoryIcon } from "./constants";
 
 type CategoryPickerModalProps = {
   visible: boolean;
@@ -31,12 +33,21 @@ export function CategoryPickerModal({
               return (
                 <Pressable
                   key={category}
-                  className={`rounded-2xl border px-4 py-4 ${selected ? "border-cyan-400 bg-cyan-400/15" : "border-white/10 bg-slate-900"}`}
+                  className={`flex-row items-center gap-3 rounded-2xl border px-4 py-4 ${selected ? "border-cyan-400 bg-cyan-400/15" : "border-white/10 bg-slate-900"}`}
                   onPress={() => {
                     onSelect(category);
                     onClose();
                   }}
                 >
+                  <View
+                    className={`h-9 w-9 items-center justify-center rounded-xl ${selected ? "bg-cyan-400/20" : "bg-white/5"}`}
+                  >
+                    <Ionicons
+                      name={getTransactionCategoryIcon(category)}
+                      size={18}
+                      color={selected ? "#67e8f9" : "#cbd5e1"}
+                    />
+                  </View>
                   <Text className={`text-base font-semibold ${selected ? "text-cyan-200" : "text-white"}`}>
                     {label}
                   </Text>

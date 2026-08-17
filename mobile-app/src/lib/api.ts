@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from "axios";
+import { create as createAxiosInstance, isAxiosError, type AxiosError } from "axios";
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
@@ -51,6 +51,9 @@ export type TransactionTotals = {
 
 export type TransactionListResponse = {
   count: number;
+  total_pages: number;
+  current_page: number;
+  page_size: number;
   next: string | null;
   previous: string | null;
   results: TransactionRecord[];
@@ -67,7 +70,6 @@ type TransactionQueryParams = {
   amount_min?: number;
   amount_max?: number;
   page?: number;
-  page_size?: number;
 };
 
 type TransactionPayload = {
@@ -91,15 +93,22 @@ type AuthContextTokens = AuthTokens & {
   source?: "bootstrap" | "login" | "refresh";
 };
 
-const api = axios.create({
+// Generous enough to survive a cold start on the backend host plus a slow
+// Gemini vision call for receipt scanning, but still fails instead of
+// leaving callers (like the scan button's loading state) hanging forever.
+const REQUEST_TIMEOUT_MS = 60000;
+
+const api = createAxiosInstance({
   baseURL: API_URL,
+  timeout: REQUEST_TIMEOUT_MS,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-const refreshClient = axios.create({
+const refreshClient = createAxiosInstance({
   baseURL: API_URL,
+  timeout: REQUEST_TIMEOUT_MS,
   headers: {
     "Content-Type": "application/json",
   },
@@ -417,6 +426,91 @@ export async function downloadTransactionsPdf(month: number, year: number) {
   );
 
   return response.data;
+}
+
+function extractFieldMessage(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+  if (Array.isArray(value) && typeof value[0] === "string" && value[0].trim()) {
+    return value[0];
+  }
+  return null;
+}
+
+// A single-item validation error is a flat field-keyed object, e.g.
+// {"amount": ["Amount must be greater than zero."]}. Returns the first
+// field's message, if any.
+function extractFirstFieldMessage(value: unknown): string | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const [, fieldValue] = Object.entries(value as Record<string, unknown>)[0] ?? [];
+  return extractFieldMessage(fieldValue);
+}
+
+export function getErrorMessage(error: unknown, fallback: string): string {
+  if (!isAxiosError(error)) {
+    return fallback;
+  }
+
+  if (error.code === "ECONNABORTED") {
+    return "That took too long to respond. Please try again.";
+  }
+
+  const data = error.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
+  }
+
+  if (Array.isArray(data)) {
+    // Older/alternate DRF shape: one object per submitted item, {} for
+    // items that passed validation.
+    for (let index = 0; index < data.length; index += 1) {
+      const message = extractFirstFieldMessage(data[index]);
+      if (message) {
+        return `Item ${index + 1}: ${message}`;
+      }
+    }
+
+    return fallback;
+  }
+
+  if (data && typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    const detail = record.detail ?? record.error;
+    if (typeof detail === "string" && detail.trim()) {
+      return detail;
+    }
+
+    const keys = Object.keys(record);
+
+    // DRF's actual bulk-create (many=True) validation error shape is
+    // "compact": only the indices that failed are present at all, each
+    // keyed by their position in the submitted list, e.g.
+    // {"1": {"amount": ["Amount must be greater than zero."]}}. It is NOT
+    // a plain array with empty placeholders for the items that passed.
+    const isIndexKeyed = keys.length > 0 && keys.every((key) => /^\d+$/.test(key));
+    if (isIndexKeyed) {
+      for (const [index, itemErrors] of Object.entries(record)) {
+        const message = extractFirstFieldMessage(itemErrors);
+        if (message) {
+          return `Item ${Number(index) + 1}: ${message}`;
+        }
+      }
+
+      return fallback;
+    }
+
+    const message = extractFirstFieldMessage(record);
+    if (message) {
+      return message;
+    }
+  }
+
+  return fallback;
 }
 
 export default api;

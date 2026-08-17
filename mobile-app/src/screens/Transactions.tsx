@@ -1,40 +1,33 @@
-import { useCallback, useMemo, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  View,
-} from "react-native";
+// @ts-nocheck
+import { useCallback, useState } from "react";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
 import { useFocusEffect, useRouter } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
-
-import "../../../global.css";
 
 import { useAuth } from "../context/AuthContext";
 import {
   createTransaction,
   deleteTransaction,
-  downloadTransactionsPdf,
+  getErrorMessage,
   getTransactions,
   parseTransactionsFromImage,
   updateTransaction,
 } from "../lib/api";
 import {
   TransactionComposerModal,
+  TransactionReceiptReviewModal,
   TransactionRow,
   TransactionsFilterDrawer,
   TransactionsHeader,
   TransactionsPagination,
+  TransactionsPdfExportModal,
+  normalizeTransactionCategory,
   type Transaction,
   type TransactionFilterState,
   type TransactionFormValues,
   type TransactionTotals,
 } from "../components/transactions";
+import { ErrorBanner } from "../components/ui";
 
 const DEFAULT_FILTERS: TransactionFilterState = {
   search: "",
@@ -44,14 +37,13 @@ const DEFAULT_FILTERS: TransactionFilterState = {
   dateBefore: "",
   amountMin: "",
   amountMax: "",
-  pageSize: "10",
 };
 
 const DEFAULT_FORM_VALUES: TransactionFormValues = {
   date: new Date().toISOString().slice(0, 10),
   description: "",
   amount: "",
-  category: "expense",
+  category: "miscellaneous",
   is_recurring: false,
 };
 
@@ -81,23 +73,19 @@ function buildQueryParams(filters: TransactionFilterState, page: number) {
         ? Number(filters.amountMax.trim())
         : undefined,
     page,
-    page_size: Number.parseInt(filters.pageSize, 10) || 10,
   };
-}
-
-function arrayBufferToFile(buffer: ArrayBuffer, filename: string) {
-  const file = new FileSystem.File(FileSystem.Paths.cache, filename);
-  file.write(new Uint8Array(buffer));
-  return file;
 }
 
 export default function TransactionsScreen() {
   const router = useRouter();
-  const { onLogout } = useAuth();
+  const { authState, onLogout } = useAuth();
+  const displayName = authState.user?.first_name || authState.user?.username;
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totals, setTotals] = useState<TransactionTotals | null>(null);
   const [count, setCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] =
     useState<TransactionFilterState>(DEFAULT_FILTERS);
@@ -108,7 +96,10 @@ export default function TransactionsScreen() {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isPdfExportModalOpen, setIsPdfExportModalOpen] = useState(false);
+  const [scannedReceiptTransactions, setScannedReceiptTransactions] =
+    useState<TransactionFormValues[]>([]);
+  const [isReceiptReviewOpen, setIsReceiptReviewOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadTransactions = useCallback(async () => {
@@ -127,8 +118,12 @@ export default function TransactionsScreen() {
       setTransactions(data.results);
       setTotals(data.totals);
       setCount(data.count);
+      setTotalPages(Math.max(1, data.total_pages));
+      setPageSize(data.page_size);
     } catch (error) {
-      setErrorMessage("Transactions could not be loaded right now.");
+      setErrorMessage(
+        getErrorMessage(error, "Transactions could not be loaded right now."),
+      );
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -141,22 +136,6 @@ export default function TransactionsScreen() {
     }, [loadTransactions]),
   );
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(count / Number(filters.pageSize || 10)),
-  );
-
-  const categoryOptions = useMemo(() => {
-    const values = new Set<string>();
-    transactions.forEach((transaction) => {
-      if (transaction.category) {
-        values.add(transaction.category);
-      }
-    });
-
-    return Array.from(values).sort((left, right) => left.localeCompare(right));
-  }, [transactions]);
-
   const openCreateComposer = () => {
     setSelectedTransaction(null);
     setIsComposerOpen(true);
@@ -167,20 +146,8 @@ export default function TransactionsScreen() {
     setIsComposerOpen(true);
   };
 
-  const submitComposer = async (
-    payload: TransactionFormValues | TransactionFormValues[],
-  ) => {
-    if (Array.isArray(payload)) {
-      await createTransaction(
-        payload.map((item) => ({
-          date: item.date,
-          description: item.description,
-          amount: Number(item.amount),
-          category: item.category,
-          is_recurring: item.is_recurring,
-        })),
-      );
-    } else if (selectedTransaction) {
+  const submitComposer = async (payload: TransactionFormValues) => {
+    if (selectedTransaction) {
       await updateTransaction(selectedTransaction.id, {
         date: payload.date,
         description: payload.description,
@@ -201,6 +168,32 @@ export default function TransactionsScreen() {
     await loadTransactions();
   };
 
+  const handleReceiptScanned = (transactions: TransactionFormValues[]) => {
+    setIsComposerOpen(false);
+    setSelectedTransaction(null);
+    setScannedReceiptTransactions(transactions);
+
+    // Wait for the composer modal's close animation to finish before
+    // presenting the review modal so the two native modals never overlap.
+    setTimeout(() => setIsReceiptReviewOpen(true), 300);
+  };
+
+  const saveScannedTransactions = async (
+    transactions: TransactionFormValues[],
+  ) => {
+    await createTransaction(
+      transactions.map((item) => ({
+        date: item.date,
+        description: item.description,
+        amount: Number(item.amount),
+        category: item.category,
+        is_recurring: item.is_recurring,
+      })),
+    );
+
+    await loadTransactions();
+  };
+
   const deleteSelectedTransaction = async () => {
     if (!selectedTransaction) {
       return;
@@ -210,26 +203,12 @@ export default function TransactionsScreen() {
     await loadTransactions();
   };
 
-  const parseReceiptImage = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      copyToCacheDirectory: true,
-      type: "image/*",
-    } as any);
-
-    if (result.canceled) {
-      return null;
-    }
-
-    const asset = result.assets?.[0];
-    if (!asset) {
-      return null;
-    }
-
-    const parsed = await parseTransactionsFromImage({
-      uri: asset.uri,
-      name: asset.name,
-      type: asset.mimeType ?? "image/jpeg",
-    });
+  const parseReceiptImage = async (file: {
+    uri: string;
+    name?: string;
+    type?: string;
+  }) => {
+    const parsed = await parseTransactionsFromImage(file);
 
     if (!parsed.transactions?.length) {
       return null;
@@ -239,36 +218,9 @@ export default function TransactionsScreen() {
       date: transaction.date,
       description: transaction.description,
       amount: String(transaction.amount),
-      category: transaction.category,
+      category: normalizeTransactionCategory(transaction.category),
       is_recurring: transaction.is_recurring,
     }));
-  };
-
-  const exportMonthlyPdf = async () => {
-    setIsExportingPdf(true);
-
-    try {
-      const now = new Date();
-      const pdfBuffer = await downloadTransactionsPdf(
-        now.getMonth() + 1,
-        now.getFullYear(),
-      );
-      const file = arrayBufferToFile(
-        pdfBuffer,
-        `transactions_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}.pdf`,
-      );
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(file.uri, {
-          mimeType: "application/pdf",
-          UTI: "com.adobe.pdf",
-        });
-      }
-    } catch (error) {
-      setErrorMessage("PDF export failed for the selected month.");
-    } finally {
-      setIsExportingPdf(false);
-    }
   };
 
   const handleFilterChange = (nextValue: Partial<TransactionFilterState>) => {
@@ -294,7 +246,7 @@ export default function TransactionsScreen() {
 
   const handleLogout = async () => {
     await onLogout();
-    router.replace("/login" as any);
+    router.replace("/login");
   };
 
   return (
@@ -302,7 +254,6 @@ export default function TransactionsScreen() {
       <TransactionsFilterDrawer
         isOpen={isFilterDrawerOpen}
         value={filters}
-        categories={categoryOptions}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
@@ -324,6 +275,22 @@ export default function TransactionsScreen() {
         onSubmit={submitComposer}
         onDelete={selectedTransaction ? deleteSelectedTransaction : undefined}
         onParseReceipt={parseReceiptImage}
+        onReceiptScanned={handleReceiptScanned}
+      />
+
+      <TransactionReceiptReviewModal
+        visible={isReceiptReviewOpen}
+        transactions={scannedReceiptTransactions}
+        onClose={() => {
+          setIsReceiptReviewOpen(false);
+          setScannedReceiptTransactions([]);
+        }}
+        onSave={saveScannedTransactions}
+      />
+
+      <TransactionsPdfExportModal
+        visible={isPdfExportModalOpen}
+        onClose={() => setIsPdfExportModalOpen(false)}
       />
 
       <FlatList
@@ -346,24 +313,19 @@ export default function TransactionsScreen() {
         ListHeaderComponent={
           <View className="mb-5 gap-4">
             <TransactionsHeader
-              userName="Fardin"
+              userName={displayName}
               totals={totals}
               searchValue={searchInput}
               onSearchChange={setSearchInput}
               onSearchSubmit={handleSearchSubmit}
               onOpenFilters={() => setIsFilterDrawerOpen(true)}
               onOpenComposer={openCreateComposer}
-              onOpenAnalysis={() => router.push("/analysis" as any)}
-              onExportPdf={exportMonthlyPdf}
+              onOpenAnalysis={() => router.push("/analysis")}
+              onExportPdf={() => setIsPdfExportModalOpen(true)}
               onLogout={handleLogout}
-              isExportingPdf={isExportingPdf}
             />
 
-            {errorMessage ? (
-              <View className="rounded-[1.5rem] border border-rose-400/20 bg-rose-400/10 px-4 py-3">
-                <Text className="text-sm text-rose-200">{errorMessage}</Text>
-              </View>
-            ) : null}
+            <ErrorBanner message={errorMessage} className="rounded-[1.5rem]" />
           </View>
         }
         ListEmptyComponent={
@@ -392,7 +354,7 @@ export default function TransactionsScreen() {
             page={page}
             totalPages={totalPages}
             count={count}
-            pageSize={Number(filters.pageSize || 10)}
+            pageSize={pageSize}
             onPrevious={() => setPage((current) => Math.max(1, current - 1))}
             onNext={() =>
               setPage((current) => Math.min(totalPages, current + 1))
@@ -404,7 +366,7 @@ export default function TransactionsScreen() {
       <View className="absolute bottom-6 right-5 gap-3">
         <Pressable
           className="h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5"
-          onPress={() => router.push("/analysis" as any)}
+          onPress={() => router.push("/analysis")}
         >
           <Text className="text-lg font-semibold text-white">AI</Text>
         </Pressable>

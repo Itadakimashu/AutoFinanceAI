@@ -1,1 +1,1 @@
-export { default } from "./screen/Analysis";
+export { default } from "../screens/Analysis";

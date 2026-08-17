@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import {
   clearStoredAuthTokens,
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         hydrated: true,
         user,
       });
-    } catch (error) {
+    } catch {
       await clearStoredAuthTokens();
       setAuthState({
         accessToken: null,
@@ -180,19 +180,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return updatePassword(payload);
   };
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      authState,
-      tokens: getAuthTokens(),
-      onRegister: register,
-      onLogin: login,
-      onLogout: logout,
-      onRefreshUser: refreshUser,
-      onUpdateProfile: updateProfile,
-      onChangePassword: changePassword,
-    }),
-    [authState],
-  );
+  const value: AuthContextValue = {
+    authState,
+    tokens: getAuthTokens(),
+    onRegister: register,
+    onLogin: login,
+    onLogout: logout,
+    onRefreshUser: refreshUser,
+    onUpdateProfile: updateProfile,
+    onChangePassword: changePassword,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

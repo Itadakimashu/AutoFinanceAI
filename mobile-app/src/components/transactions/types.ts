@@ -39,5 +39,4 @@ export type TransactionFilterState = {
   dateBefore: string;
   amountMin: string;
   amountMax: string;
-  pageSize: string;
 };

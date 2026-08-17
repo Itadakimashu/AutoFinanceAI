@@ -1,1 +1,1 @@
-export { default } from "./screen/Transactions";
+export { default } from "../screens/Transactions";

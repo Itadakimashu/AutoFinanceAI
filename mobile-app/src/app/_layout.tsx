@@ -3,7 +3,7 @@ import { ActivityIndicator, Text, View } from "react-native";
 
 import { Stack, useRouter, useSegments } from "expo-router";
 
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 
 import "../../global.css";
 
@@ -23,12 +23,12 @@ function RouteGate() {
     const isPublicRoute = PUBLIC_ROUTES.has(currentRoute);
 
     if (!authState.authenticated && !isPublicRoute) {
-      router.replace("/login" as any);
+      router.replace("/login");
       return;
     }
 
     if (authState.authenticated && isPublicRoute) {
-      router.replace("/transactions" as any);
+      router.replace("/transactions");
     }
   }, [authState.authenticated, authState.hydrated, router, segments]);
 
