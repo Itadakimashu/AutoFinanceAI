@@ -67,8 +67,11 @@ type TransactionQueryParams = {
   date?: string;
   date_after?: string;
   date_before?: string;
-  amount_min?: number;
-  amount_max?: number;
+  // django-filter's Meta.fields shorthand ({'amount': ['gte', 'lte']})
+  // auto-generates query params named "<field>__<lookup>", not "amount_min"
+  // / "amount_max".
+  amount__gte?: number;
+  amount__lte?: number;
   page?: number;
 };
 

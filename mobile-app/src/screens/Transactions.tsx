@@ -64,11 +64,11 @@ function buildQueryParams(filters: TransactionFilterState, page: number) {
     category: filters.category === "all" ? undefined : filters.category,
     date_after: filters.dateAfter.trim() || undefined,
     date_before: filters.dateBefore.trim() || undefined,
-    amount_min:
+    amount__gte:
       filters.amountMin.trim() !== ""
         ? Number(filters.amountMin.trim())
         : undefined,
-    amount_max:
+    amount__lte:
       filters.amountMax.trim() !== ""
         ? Number(filters.amountMax.trim())
         : undefined,

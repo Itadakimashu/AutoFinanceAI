@@ -1,4 +1,9 @@
-import { ActivityIndicator, Pressable, Text, type PressableProps } from "react-native";
+import type { ComponentProps } from "react";
+import { ActivityIndicator, Pressable, Text, View, type PressableProps } from "react-native";
+
+import { Ionicons } from "@expo/vector-icons";
+
+type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "danger";
 
@@ -6,6 +11,7 @@ type ButtonProps = {
   label: string;
   onPress: () => void;
   variant?: ButtonVariant;
+  icon?: IoniconName;
   loading?: boolean;
   disabled?: boolean;
   className?: string;
@@ -13,27 +19,27 @@ type ButtonProps = {
 
 const VARIANT_STYLES: Record<
   ButtonVariant,
-  { container: string; text: string; spinnerColor: string }
+  { container: string; text: string; iconColor: string }
 > = {
   primary: {
     container: "bg-cyan-400",
     text: "text-slate-950",
-    spinnerColor: "#020617",
+    iconColor: "#020617",
   },
   secondary: {
     container: "border border-white/10 bg-white/5",
     text: "text-white",
-    spinnerColor: "#e2e8f0",
+    iconColor: "#e2e8f0",
   },
   outline: {
     container: "border border-cyan-400/20 bg-cyan-400/10",
     text: "text-cyan-200",
-    spinnerColor: "#22d3ee",
+    iconColor: "#22d3ee",
   },
   danger: {
     container: "border border-rose-400/30 bg-rose-400/10",
     text: "text-rose-200",
-    spinnerColor: "#fda4af",
+    iconColor: "#fda4af",
   },
 };
 
@@ -41,6 +47,7 @@ export function Button({
   label,
   onPress,
   variant = "primary",
+  icon,
   loading = false,
   disabled = false,
   className,
@@ -56,11 +63,16 @@ export function Button({
       hitSlop={hitSlop}
     >
       {loading ? (
-        <ActivityIndicator color={styles.spinnerColor} />
+        <ActivityIndicator color={styles.iconColor} />
       ) : (
-        <Text className={`text-center text-sm font-semibold ${styles.text}`}>
-          {label}
-        </Text>
+        <View className="flex-row items-center justify-center gap-2">
+          {icon ? (
+            <Ionicons name={icon} size={16} color={styles.iconColor} />
+          ) : null}
+          <Text className={`text-center text-sm font-semibold ${styles.text}`}>
+            {label}
+          </Text>
+        </View>
       )}
     </Pressable>
   );

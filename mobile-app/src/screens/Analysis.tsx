@@ -1,11 +1,15 @@
+import type { ComponentProps } from "react";
 import { useState } from "react";
 import { ActivityIndicator, Text, TextInput, View } from "react-native";
 
+import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 import { downloadTransactionsPdf, getAnalysis, getErrorMessage } from "../lib/api";
 import { Button, ErrorBanner, ScreenBackdrop } from "../components/ui";
+
+type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
 type AnalysisMonth = {
   month: string;
@@ -80,6 +84,13 @@ const TONE_STYLES: Record<
   },
 };
 
+const TONE_ICON_COLOR: Record<Tone, string> = {
+  cyan: "#22d3ee",
+  emerald: "#34d399",
+  amber: "#fbbf24",
+  rose: "#fb7185",
+};
+
 function scoreTone(status?: string): Tone {
   const normalized = (status ?? "").toLowerCase();
   if (normalized === "good") return "emerald";
@@ -88,40 +99,65 @@ function scoreTone(status?: string): Tone {
   return "cyan";
 }
 
+function scoreIcon(status?: string): IoniconName {
+  const normalized = (status ?? "").toLowerCase();
+  if (normalized === "good") return "shield-checkmark-outline";
+  if (normalized === "fair") return "alert-circle-outline";
+  if (normalized === "poor") return "warning-outline";
+  return "speedometer-outline";
+}
+
 function TextInputPill({
   label,
+  icon,
   value,
   onChangeText,
   onSubmitEditing,
 }: {
   label: string;
+  icon: IoniconName;
   value: string;
   onChangeText: (value: string) => void;
   onSubmitEditing: () => void;
 }) {
   return (
-    <View className="flex-1 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3">
-      <Text className="text-xs uppercase tracking-[0.2em] text-slate-500">
-        {label}
-      </Text>
-      <TextInput
-        keyboardType="number-pad"
-        placeholderTextColor="#64748b"
-        className="mt-1 text-base text-white"
-        value={value}
-        onChangeText={onChangeText}
-        onSubmitEditing={onSubmitEditing}
-        returnKeyType="done"
-      />
+    <View className="flex-1 flex-row items-center gap-3 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3">
+      <Ionicons name={icon} size={18} color="#64748b" />
+      <View className="flex-1">
+        <Text className="text-xs uppercase tracking-[0.2em] text-slate-500">
+          {label}
+        </Text>
+        <TextInput
+          keyboardType="number-pad"
+          placeholderTextColor="#64748b"
+          className="mt-1 text-base text-white"
+          value={value}
+          onChangeText={onChangeText}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType="done"
+        />
+      </View>
     </View>
   );
 }
 
-function SectionHeading({ tone, label }: { tone: Tone; label: string }) {
+function SectionHeading({
+  tone,
+  icon,
+  label,
+}: {
+  tone: Tone;
+  icon: IoniconName;
+  label: string;
+}) {
   const styles = TONE_STYLES[tone];
   return (
     <View className="flex-row items-center gap-2">
-      <View className={`h-1.5 w-1.5 rounded-full ${styles.fill}`} />
+      <View
+        className={`h-5 w-5 items-center justify-center rounded-full ${styles.background}`}
+      >
+        <Ionicons name={icon} size={12} color={TONE_ICON_COLOR[tone]} />
+      </View>
       <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
         {label}
       </Text>
@@ -129,16 +165,24 @@ function SectionHeading({ tone, label }: { tone: Tone; label: string }) {
   );
 }
 
-function InsightRow({ tone, glyph, text }: { tone: Tone; glyph: string; text: string }) {
+function InsightRow({
+  tone,
+  icon,
+  text,
+}: {
+  tone: Tone;
+  icon: IoniconName;
+  text: string;
+}) {
   const styles = TONE_STYLES[tone];
   return (
     <View className="flex-row gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3">
       <View
-        className={`h-6 w-6 items-center justify-center rounded-lg ${styles.background}`}
+        className={`h-7 w-7 items-center justify-center rounded-lg ${styles.background}`}
       >
-        <Text className={`text-xs font-bold ${styles.text}`}>{glyph}</Text>
+        <Ionicons name={icon} size={15} color={TONE_ICON_COLOR[tone]} />
       </View>
-      <Text className="flex-1 pt-0.5 text-sm leading-6 text-slate-200">
+      <Text className="flex-1 pt-1 text-sm leading-6 text-slate-200">
         {text}
       </Text>
     </View>
@@ -147,14 +191,14 @@ function InsightRow({ tone, glyph, text }: { tone: Tone; glyph: string; text: st
 
 function InsightSection({
   tone,
+  icon,
   label,
-  glyph,
   items,
   divider,
 }: {
   tone: Tone;
+  icon: IoniconName;
   label: string;
-  glyph: string;
   items: string[];
   divider: boolean;
 }) {
@@ -164,10 +208,10 @@ function InsightSection({
 
   return (
     <View className={divider ? "mt-6 border-t border-white/5 pt-6" : "mt-5"}>
-      <SectionHeading tone={tone} label={label} />
+      <SectionHeading tone={tone} icon={icon} label={label} />
       <View className="mt-3 gap-2">
         {items.map((item, index) => (
-          <InsightRow key={`${label}-${index}`} tone={tone} glyph={glyph} text={item} />
+          <InsightRow key={`${label}-${index}`} tone={tone} icon={icon} text={item} />
         ))}
       </View>
     </View>
@@ -258,9 +302,14 @@ export default function AnalysisScreen() {
   return (
     <ScreenBackdrop contentClassName="flex-grow px-5 pb-10 pt-14">
       <View className="mb-5 rounded-[2rem] border border-white/10 bg-white/5 p-5">
-        <Text className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300/80">
-          Monthly analysis
-        </Text>
+        <View className="flex-row items-center gap-2">
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-cyan-400/15">
+            <Ionicons name="sparkles-outline" size={14} color="#22d3ee" />
+          </View>
+          <Text className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300/80">
+            Monthly analysis
+          </Text>
+        </View>
         <Text className="mt-3 text-4xl font-semibold leading-tight text-white">
           AI insights for your spending rhythm.
         </Text>
@@ -273,6 +322,7 @@ export default function AnalysisScreen() {
         <View className="mb-4 flex-row gap-3">
           <TextInputPill
             label="Month"
+            icon="calendar-outline"
             value={filters.month}
             onChangeText={(month) =>
               setFilters((current) => ({ ...current, month }))
@@ -281,6 +331,7 @@ export default function AnalysisScreen() {
           />
           <TextInputPill
             label="Year"
+            icon="calendar-number-outline"
             value={filters.year}
             onChangeText={(year) =>
               setFilters((current) => ({ ...current, year }))
@@ -291,6 +342,7 @@ export default function AnalysisScreen() {
 
         <Button
           label="Get analysis"
+          icon="sparkles-outline"
           onPress={loadAnalysis}
           loading={isLoading}
           className="mb-3"
@@ -298,6 +350,7 @@ export default function AnalysisScreen() {
 
         <Button
           label="Export monthly PDF"
+          icon="download-outline"
           variant="outline"
           onPress={sharePdf}
           loading={isExporting}
@@ -308,6 +361,9 @@ export default function AnalysisScreen() {
 
       {!hasSearched && !isLoading ? (
         <View className="items-center rounded-[2rem] border border-white/10 bg-slate-900/90 px-4 py-10">
+          <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-white/5">
+            <Ionicons name="stats-chart-outline" size={22} color="#64748b" />
+          </View>
           <Text className="text-center text-sm text-slate-400">
             Select a month and year above, then press enter to load your AI
             financial review.
@@ -328,13 +384,24 @@ export default function AnalysisScreen() {
         <>
           <View className="mb-5 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/90 p-5">
             <View className="flex-row items-start justify-between">
-              <View>
-                <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Financial health score
-                </Text>
-                <Text className="mt-1 text-xs text-slate-500">
-                  {monthLabel} {yearNumber}
-                </Text>
+              <View className="flex-row items-center gap-3">
+                <View
+                  className={`h-10 w-10 items-center justify-center rounded-2xl ${toneStyles.background}`}
+                >
+                  <Ionicons
+                    name={scoreIcon(score?.status)}
+                    size={20}
+                    color={TONE_ICON_COLOR[tone]}
+                  />
+                </View>
+                <View>
+                  <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Financial health score
+                  </Text>
+                  <Text className="mt-1 text-xs text-slate-500">
+                    {monthLabel} {yearNumber}
+                  </Text>
+                </View>
               </View>
               <View
                 className={`rounded-full border px-3 py-1 ${toneStyles.border} ${toneStyles.background}`}
@@ -366,9 +433,12 @@ export default function AnalysisScreen() {
 
           {analysis.overview ? (
             <View className="mb-5 rounded-[2rem] border border-white/10 bg-white/5 p-5">
-              <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Overview
-              </Text>
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="document-text-outline" size={16} color="#67e8f9" />
+                <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Overview
+                </Text>
+              </View>
               <View className="mt-3 border-l-2 border-cyan-400/40 pl-4">
                 <Text className="text-sm leading-7 text-slate-200">
                   {analysis.overview}
@@ -381,31 +451,34 @@ export default function AnalysisScreen() {
           analysis.warnings?.length ||
           analysis.good_habits?.length ? (
             <View className="mb-5 rounded-[2rem] border border-white/10 bg-slate-900/90 p-5">
-              <Text className="text-lg font-semibold text-white">
-                Key insights
-              </Text>
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="list-outline" size={18} color="#f4f4f5" />
+                <Text className="text-lg font-semibold text-white">
+                  Key insights
+                </Text>
+              </View>
               <Text className="mt-1 text-xs text-slate-500">
                 Tips, watch-outs, and habits worth keeping
               </Text>
 
               <InsightSection
                 tone="cyan"
+                icon="bulb-outline"
                 label="Quick tips"
-                glyph="+"
                 items={analysis.quick_tips ?? []}
                 divider={false}
               />
               <InsightSection
                 tone="rose"
+                icon="alert-circle-outline"
                 label="Warnings"
-                glyph="!"
                 items={analysis.warnings ?? []}
                 divider={Boolean(analysis.quick_tips?.length)}
               />
               <InsightSection
                 tone="emerald"
+                icon="checkmark-circle-outline"
                 label="Good habits"
-                glyph="✓"
                 items={analysis.good_habits ?? []}
                 divider={Boolean(
                   analysis.quick_tips?.length || analysis.warnings?.length,
@@ -416,9 +489,12 @@ export default function AnalysisScreen() {
 
           {analysis.analysis ? (
             <View className="mb-5 rounded-[2rem] border border-white/10 bg-white/5 p-5">
-              <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Raw analysis
-              </Text>
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="document-outline" size={16} color="#94a3b8" />
+                <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Raw analysis
+                </Text>
+              </View>
               <Text className="mt-3 text-sm leading-7 text-slate-300">
                 {analysis.analysis}
               </Text>

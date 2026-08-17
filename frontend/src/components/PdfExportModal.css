@@ -1,0 +1,16 @@
+.pdf-export-modal__overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1rem; background: rgba(15, 23, 42, .65); }
+.pdf-export-modal { width: min(100%, 28rem); overflow: hidden; border: 1px solid #374151; border-radius: 12px; background: #1f2937; color: #e5e7eb; box-shadow: 0 20px 40px rgba(0, 0, 0, .45); }
+.pdf-export-modal__header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; color: #fff; background: linear-gradient(135deg, #667eea, #764ba2); }
+.pdf-export-modal__header h3 { margin: 0; font-size: 1.15rem; }
+.pdf-export-modal__header button { border: 0; background: transparent; color: inherit; font-size: 1.75rem; cursor: pointer; }
+.pdf-export-modal form { padding: 1.25rem; }
+.pdf-export-modal p { margin: 0 0 1.25rem; color: #cbd5e1; }
+.pdf-export-modal__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.pdf-export-modal label { display: grid; gap: .4rem; font-weight: 600; font-size: .9rem; }
+.pdf-export-modal select { width: 100%; padding: .65rem .75rem; border: 1px solid #4b5563; border-radius: 7px; background: #374151; color: inherit; font: inherit; }
+.pdf-export-modal__actions { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.5rem; }
+.pdf-export-modal__actions button { padding: .6rem 1rem; border: 0; border-radius: 7px; cursor: pointer; font-weight: 600; }
+.pdf-export-modal__actions button:first-child { background: #4b5563; color: #fff; }
+.pdf-export-modal__actions button:last-child { background: #10b981; color: #fff; }
+.pdf-export-modal button:disabled, .pdf-export-modal select:disabled { cursor: not-allowed; opacity: .65; }
+@media (max-width: 420px) { .pdf-export-modal__fields { grid-template-columns: 1fr; } }
